@@ -1,3 +1,9 @@
+"""
+The training function
+It generates a model and saves as a file
+This training is the one with a cross-entropy training error 
+"""
+
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
@@ -6,7 +12,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt 
 from torch.utils.tensorboard import SummaryWriter
-import pdb
+# import pdb
 '''
 # Clean the tesnsorboardX's root dir
 import os
@@ -16,21 +22,19 @@ if os.path.isdir('./mnistC'):
     print('Finish deleting')
 '''
 
-train = pd.read_csv("./data/train.csv",dtype = np.float32)
-
+train = pd.read_csv("../data/train.csv", dtype = np.float32)
 # Split data into features(pixels) and labels(numbers from 0 to 9)
 targets_numpy = train.label.values
 # Normalization
 features_numpy = train.loc[:, train.columns != "label"].values / 255
 
-# Train test split. Size of train data is 80% and size of test data is 20%. 
-features_train, features_test, targets_train, targets_test = train_test_split( 
-                                                    features_numpy,
-                                                    targets_numpy,
-                                                    test_size = 0.1,
-                                                    random_state = 42) 
-pdb.set_trace()
-# Create feature and targets tensor for train set. 
+# Train test split.  Size of train data is 80% and size of test data is 20%.
+features_train, features_test, targets_train, targets_test = train_test_split(features_numpy,
+                                                                                                                    targets_numpy,
+                                                                                                                    test_size = 0.1,
+                                                                                                                    random_state = 42) 
+# pdb.set_trace()
+# Create feature and targets tensor for train set.
 featuresTrain = torch.from_numpy(features_train)
 targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
 
@@ -40,23 +44,22 @@ targetsTest = torch.from_numpy(targets_test).type(torch.LongTensor)
 
 # batch_size, epoch and iteration
 batch_size = 100
-n_iters = 10000
+n_iters = 50000
 num_epochs = n_iters / (len(features_train) / batch_size)
 num_epochs = int(num_epochs)
 print(f'{num_epochs} epochs in training')
+
 # Pytorch train and test sets
 train = torch.utils.data.TensorDataset(featuresTrain, targetsTrain)
 test = torch.utils.data.TensorDataset(featuresTest, targetsTest)
 
 # Data loader
 train_loader = torch.utils.data.DataLoader(train, 
-                                            batch_size = batch_size, 
-                                            shuffle = False)
+                                                                     batch_size = batch_size, 
+                                                                     shuffle = False)
 test_loader = torch.utils.data.DataLoader(test, 
-                                            batch_size = batch_size, 
-                                            shuffle = False)
-
-##########################################################
+                                                                   batch_size = batch_size, 
+                                                                   shuffle = False)
 
 # Create CNN Model
 class CNNModel(nn.Module):
@@ -84,10 +87,10 @@ class CNNModel(nn.Module):
         # Max pool 1
         out = self.maxpool1(out)
         
-        # Convolution 2 
+        # Convolution 2
         out = self.cnn2(out)
         out = self.relu2(out)
-        # Max pool 2 
+        # Max pool 2
         out = self.maxpool2(out)
 
         out = out.view(out.size(0), -1)
@@ -96,24 +99,10 @@ class CNNModel(nn.Module):
         out = self.fc1(out)
         
         return out
-
-# batch_size, epoch and iteration
-batch_size = 100
-n_iters = 2500
-num_epochs = n_iters / (len(features_train) / batch_size)
-num_epochs = int(num_epochs)
-
-# Pytorch train and test sets
-train = torch.utils.data.TensorDataset(featuresTrain,targetsTrain)
-test = torch.utils.data.TensorDataset(featuresTest,targetsTest)
-
-# data loader
-train_loader = torch.utils.data.DataLoader(train, batch_size = batch_size, shuffle = False)
-test_loader = torch.utils.data.DataLoader(test, batch_size = batch_size, shuffle = False)
     
 # Create ANN
 model = CNNModel()
-# Cross Entropy Loss 
+# Cross Entropy Loss
 error = nn.CrossEntropyLoss()
 # SGD Optimizer
 learning_rate = 0.1
@@ -124,10 +113,10 @@ count = 0
 loss_list = []
 iteration_list = []
 accuracy_list = []
-writer = SummaryWriter('./mnistC')
+writer = SummaryWriter('../boardx/mnistC')
 
 for epoch in range(num_epochs):
-    print('Training-epoch: {}'.format(epoch))
+    print('Training-epoch: {}'.format(epoch + 1))
     for i, (images, labels) in enumerate(train_loader):
         train = images.view(100,1,28,28)
         # Clear gradients
@@ -140,143 +129,141 @@ for epoch in range(num_epochs):
         loss.backward()
         # Update parameters
         optimizer.step()
+
 # save model
-torch.save(model.state_dict(),'model.pt')
+torch.save(model.state_dict(),'../data/model.pt')
 # save testing dataset
-np.savez('test.npz', features_test, targets_test )
+np.savez('../data/test.npz', features_test, targets_test)
 #torch.save(model,'model.pth')
-######################## JrX-Del-S #######################
-count += 1
-if count % 50 == 0:
-    # Calculate Accuracy         
-    correct = 0
-    total = 0
-    # Iterate through test dataset
-    for images, labels in test_loader:
-      test = images.view(100, 1, 28, 28)
-      # Forward propagation
-      outputs = model(test)
-      # Get predictions from the maximum value
-      _, predicted = torch.max(outputs.data, 1)
-      # Total number of labels
-      total += len(labels)
-      correct += (predicted == labels).sum()
-    accuracy = 100 * correct / float(total)
-    writer.add_scalar(tag = 'Accuracy-CNN',
-      scalar_value= accuracy.data, global_step= epoch * len(train_loader) + i)
-    writer.add_scalar(tag = 'Loss-CNN', 
-      scalar_value= loss.data, global_step= epoch * len(train_loader) + i)
-    # store loss and iteration
-    loss_list.append(loss.data)
-    iteration_list.append(count)
-    accuracy_list.append(accuracy)
-    if count % 500 == 0:
-       # Print Loss
-       print('Iteration: {}  Loss: {}  Accuracy: {} %'.format(count, loss.item(), accuracy))
-# visualization loss 
-plt.plot(iteration_list,loss_list)
-plt.xlabel("Number of iteration")
-plt.ylabel("Loss")
-plt.title("CNN: Loss vs Number of iteration")
-plt.show()
 
-# visualization accuracy 
-plt.plot(iteration_list,accuracy_list,color = "red")
-plt.xlabel("Number of iteration")
-plt.ylabel("Accuracy")
-plt.title("CNN: Accuracy vs Number of iteration")
-plt.show()
+#count += 1
+#if count % 50 == 0:
+#    # Calculate Accuracy
+#    correct = 0
+#    total = 0
+#    # Iterate through test dataset
+#    for images, labels in test_loader:
+#      test = images.view(100, 1, 28, 28)
+#      # Forward propagation
+#      outputs = model(test)
+#      # Get predictions from the maximum value
+#      _, predicted = torch.max(outputs.data, 1)
+#      # Total number of labels
+#      total += len(labels)
+#      correct += (predicted == labels).sum()
+#    accuracy = 100 * correct / float(total)
+#    writer.add_scalar(tag = 'Accuracy-CNN',
+#      scalar_value= accuracy.data, global_step= epoch * len(train_loader) + i)
+#    writer.add_scalar(tag = 'Loss-CNN', 
+#      scalar_value= loss.data, global_step= epoch * len(train_loader) + i)
+#    # store loss and iteration
+#    loss_list.append(loss.data)
+#    iteration_list.append(count)
+#    accuracy_list.append(accuracy)
+#    if count % 500 == 0:
+#       # Print Loss
+#       print('Iteration: {}  Loss: {}  Accuracy: {} %'.format(count, loss.item(), accuracy))
+## visualization loss
 
-######################## JrX-Del-E #######################
+#plt.plot(iteration_list,loss_list)
+#plt.xlabel("Number of iteration")
+#plt.ylabel("Loss")
+#plt.title("CNN: Loss vs Number of iteration")
+#plt.show()
 
-######################### JrX-Add-S #######################
-# features: 100(Ins) * 10(Labels)
-def DirichletFunction(inputs):
-    features = inputs.detach()
-    numLabels = 10
+## visualization accuracy
+#plt.plot(iteration_list,accuracy_list,color = "red")
+#plt.xlabel("Number of iteration")
+#plt.ylabel("Accuracy")
+#plt.title("CNN: Accuracy vs Number of iteration")
+#plt.show()
+
+########################## JrX-Add-S #######################
+## features: 100(Ins) * 10(Labels)
+#def DirichletFunction(inputs):
+#    features = inputs.detach()
+#    numLabels = 10
     
-    #|prediction|belief|dirichlet|
-    preBefDirMatrix = np.zeros((numLabels, 3), 
-                                dtype = 'float')
+#    #|prediction|belief|dirichlet|
+#    preBefDirMatrix = np.zeros((numLabels, 3), 
+#                                dtype = 'float')
 
-    # Start loop
-    for prediction in features:
-        prediction = np.array(prediction)
+#    # Start loop
+#    for prediction in features:
+#        prediction = np.array(prediction)
         
-        K = len(prediction)
+#        K = len(prediction)
 
-        alpha = prediction + 1
-        S = sum(alpha)
+#        alpha = prediction + 1
+#        S = sum(alpha)
 
-        belief = prediction / S
-        dirichlet = alpha / S
-        uncertain = K / S 
+#        belief = prediction / S
+#        dirichlet = alpha / S
+#        uncertain = K / S 
         
-        '''
-        print('=========================')
-        print(f'{K} classes')
-        print('Prediction = ', prediction)
-        print('Belief = ', belief)
-        print('DirlietchD = ', dirichlet)
-        print('Uncertaint = ', uncertain)
-        '''
+#        '''
+#        print('=========================')
+#        print(f'{K} classes')
+#        print('Prediction = ', prediction)
+#        print('Belief = ', belief)
+#        print('DirlietchD = ', dirichlet)
+#        print('Uncertaint = ', uncertain)
+#        '''
 
-        ibs = np.flip(np.argsort(dirichlet))
-        ds = dirichlet[ibs]
-        ps = prediction[ibs]
-        bs = belief[ibs]
+#        ibs = np.flip(np.argsort(dirichlet))
+#        ds = dirichlet[ibs]
+#        ps = prediction[ibs]
+#        bs = belief[ibs]
 
-        cSumPs = np.cumsum(ps)
-        cSumDs = np.cumsum(ds)
-        cSumBs = np.cumsum(bs)
+#        cSumPs = np.cumsum(ps)
+#        cSumDs = np.cumsum(ds)
+#        cSumBs = np.cumsum(bs)
 
-        preBefDirMatrix[:, 0] = preBefDirMatrix[:, 0] + cSumPs
-        preBefDirMatrix[:, 1] = preBefDirMatrix[:, 1] + cSumBs
-        preBefDirMatrix[:, 2] = preBefDirMatrix[:, 2] + cSumDs
+#        preBefDirMatrix[:, 0] = preBefDirMatrix[:, 0] + cSumPs
+#        preBefDirMatrix[:, 1] = preBefDirMatrix[:, 1] + cSumBs
+#        preBefDirMatrix[:, 2] = preBefDirMatrix[:, 2] + cSumDs
 
-    return preBefDirMatrix
-######################### JrX-Add-E #######################
-
-correct = 0
-total = 0
-numOfLabels = 10
-preBefDirMatrix = np.zeros((numOfLabels, 3), 
-                                dtype = 'float')
+#    return preBefDirMatrix
+########################## JrX-Add-E #######################
+#correct = 0
+#total = 0
+#numOfLabels = 10
+#preBefDirMatrix = np.zeros((numOfLabels, 3), 
+#                                                dtype = 'float')
  
-# Iterate through test dataset
-for images, labels in test_loader:
-    test = images.view(100, 1, 28, 28)
-# Forward propagation
-    outputs = model(test)
+## Iterate through test dataset
+#for images, labels in test_loader:
+#    test = images.view(100, 1, 28, 28)
+## Forward propagation
+#    outputs = model(test)
 
-######################### JrX-Add-S #######################
-    tmp = DirichletFunction(outputs)
-    preBefDirMatrix = preBefDirMatrix + tmp
-######################### JrX-Add-E #######################
+########################## JrX-Add-S #######################
+#    tmp = DirichletFunction(outputs)
+#    preBefDirMatrix = preBefDirMatrix + tmp
+########################## JrX-Add-E #######################
 
-    # Get predictions from the maximum value
-    _, predicted = torch.max(outputs.data, 1)
-    # Total number of labels
-    total += len(labels)
-    correct += (predicted == labels).sum()
+#    # Get predictions from the maximum value
+#    _, predicted = torch.max(outputs.data, 1)
+#    # Total number of labels
+#    total += len(labels)
+#    correct += (predicted == labels).sum()
            
-accuracy = 100 * correct / float(total)
-accuracy_list.append(accuracy)
-print('Accuracy: {} %'.format(accuracy))
+#accuracy = 100 * correct / float(total)
+#accuracy_list.append(accuracy)
+#print('Accuracy: {} %'.format(accuracy))
 
-######################### JrX-Add-S #######################
-preBefDirMatrix = preBefDirMatrix / total
-print (preBefDirMatrix)
+########################## JrX-Add-S #######################
+#preBefDirMatrix = preBefDirMatrix / total
+#print(preBefDirMatrix)
 
-tmp = np.ones(numOfLabels, dtype= int)
-idx = np.cumsum(tmp)
-for i in range(1, 3):
-    plt.plot(idx, preBefDirMatrix[:, i].T)
-plt.xlabel("Number of Candidates")
-plt.ylabel("Probability")
-plt.title("Belief-Dirichlet")
-plt.legend(['Belief', 'Dirichlet'])
-plt.show()
+#tmp = np.ones(numOfLabels, dtype= int)
+#idx = np.cumsum(tmp)
+#for i in range(1, 3):
+#    plt.plot(idx, preBefDirMatrix[:, i].T)
+#plt.xlabel("Number of Candidates")
+#plt.ylabel("Probability")
+#plt.title("Belief-Dirichlet")
+#plt.legend(['Belief', 'Dirichlet'])
+#plt.show()
+########################## JrX-Add-E #######################
 
-######################### JrX-Add-E #######################
-

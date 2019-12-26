@@ -6,11 +6,11 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt 
 from torch.utils.tensorboard import SummaryWriter
-import pdb
+# import pdb
 
 # Create CNN Model
-class CNNModel(nn.Module):
-    def __init__(self):
+class CNNModel( nn.Module ):
+    def __init__( self ):
         super(CNNModel, self).__init__()        
         # Convolution 1
         self.cnn1 = nn.Conv2d(in_channels=1, out_channels=16, kernel_size=5, stride=1, padding=0)
@@ -27,17 +27,17 @@ class CNNModel(nn.Module):
         # Fully connected 1
         self.fc1 = nn.Linear(32 * 4 * 4, 10) 
     
-    def forward(self, x):
+    def forward( self, x ):
         # Convolution 1
         out = self.cnn1(x)
         out = self.relu1(out)
         # Max pool 1
         out = self.maxpool1(out)
         
-        # Convolution 2 
+        # Convolution 2
         out = self.cnn2(out)
         out = self.relu2(out)
-        # Max pool 2 
+        # Max pool 2
         out = self.maxpool2(out)
 
         out = out.view(out.size(0), -1)
@@ -46,16 +46,17 @@ class CNNModel(nn.Module):
         out = self.fc1(out)
         
         return out
+
 ################
 #Start main
 ################
 # Loadding testing set
-npzfile = np.load('test.npz')
+npzfile = np.load('../data/test.npz')
 features_test = npzfile['arr_0']
 # Add some noise to the feature_test
 Amp = 0.2 #between 0 and 1
 noise = np.random.randn(features_test.shape[0],features_test.shape[1])
-pdb.set_trace()
+# pdb.set_trace()
 features_test = features_test + noise.astype(dtype = 'float32')
 features_test = np.clip(features_test,0,1)
 #plt.plot(SclBe,SaccBe)
@@ -70,12 +71,12 @@ n_iters = 1
 num_epochs = n_iters / (len(features_test) / batch_size)
 num_epochs = int(num_epochs)
 test_loader = torch.utils.data.DataLoader(test, 
-              batch_size = batch_size, 
-              shuffle = False)
+                                                                   batch_size = batch_size, 
+                                                                   shuffle = False)
 # Define NN model
 model = CNNModel()
 # Loading model
-model.load_state_dict(torch.load('model.pt'))
+model.load_state_dict(torch.load('../data/model.pt'))
 #model = torch.load('model.pth')
 # Infer on testing set
 correct = 0
@@ -99,6 +100,6 @@ labelssave = torch.cat(labelssave, dim=0)
 accuracy = 100 * correct.numpy() / float(total)
 print(f'accuracy on testing set: {accuracy}')
 # Save output and labels
-np.savez('outputs_test.npz', outputsave.numpy(), labelssave.numpy())
+np.savez('../data/outputs_test.npz', outputsave.numpy(), labelssave.numpy())
 
-
+

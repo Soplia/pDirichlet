@@ -1,30 +1,32 @@
+import torch
+import pandas as pd 
 import numpy as np 
 import matplotlib.pyplot as plt 
-import pdb
+# import pdb
 
-# Read Data 
-npzfile = np.load('outputs_test.npz')
+# Read Data
+npzfile = np.load('../data/outputs_test.npz')
 outputs = npzfile['arr_0']
 targets = npzfile['arr_1']
 #
 # Apply Relu
-outputs = outputs * (outputs >0) 
+outputs = outputs * (outputs > 0) 
 # Comp prob
 Se = np.sum(outputs,axis=1)
 Se = np.expand_dims(Se, axis=0)
 Se = np.repeat(Se, outputs.shape[1],axis = 0)
 Se = np.transpose(Se)
-Pr = outputs/Se
+Pr = outputs / Se
 # Comp Belief
-alpha = outputs+1
+alpha = outputs + 1
 Sa = np.sum(alpha,axis=1)
 Sa = np.expand_dims(Sa, axis=0)
 Sa = np.repeat(Sa, alpha.shape[1],axis = 0)
 Sa = np.transpose(Sa)
-Be = outputs/Sa
+Be = outputs / Sa
 # Comp uncertaintly
 K = outputs.shape[1]
-U = K/Sa[:,0]
+U = K / Sa[:,0]
 # Sort belief and prob
 classes = []
 beliefs = []
@@ -38,9 +40,9 @@ for i in range(Be.shape[0]):
   classes.append(ibs)
   beliefs.append(Bes)
   probas.append(Prs)
-classes= np.concatenate(classes, axis=0)
+classes = np.concatenate(classes, axis=0)
 classes = classes.reshape(outputs.shape)
-beliefs= np.concatenate(beliefs, axis=0)
+beliefs = np.concatenate(beliefs, axis=0)
 beliefs = beliefs.reshape(outputs.shape)
 probas = np.concatenate(probas, axis=0)
 probas = probas.reshape(outputs.shape)
@@ -51,12 +53,12 @@ probasCS = np.cumsum(probas,axis=1)
 ####
 ## +1 to all classes because 0 should not be classe
 ####
-targetsTable = (targets+1)
+targetsTable = (targets + 1)
 targetsTable = np.expand_dims(targetsTable , axis=0)
 targetsTable = np.repeat(targetsTable, outputs.shape[1],axis = 0)
 targetsTable = np.transpose(targetsTable)
 classes = classes + 1
-nb = 100 # Nb of points 
+nb = 100 # Nb of points
 SclBe = []
 SclPr = []
 SaccBe = []
@@ -74,8 +76,8 @@ for th in  np.linspace(0, 1, num=nb):
   compBe = (classesBe == targetsTable)
   compPr = (classesPr == targetsTable)
   # Get Accuracy
-  accBe = sum(compBe.flatten())/outputs.shape[0]*100
-  accPr = sum(compPr.flatten())/outputs.shape[0]*100
+  accBe = sum(compBe.flatten()) / outputs.shape[0] * 100
+  accPr = sum(compPr.flatten()) / outputs.shape[0] * 100
   SclBe.append(meanClBe)
   SclPr.append(meanClPr)
   SaccBe.append(accBe)
@@ -91,4 +93,4 @@ plt.show()
 #pdb.set_trace()
 
 
-
+
