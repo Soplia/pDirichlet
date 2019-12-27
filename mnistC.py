@@ -84,6 +84,11 @@ class CNNModelSf(nn.Module):
         out = self.fc2(out3)
         return out
 
+class CNNModelBl(nn.Module):
+    def __init__(self):
+        super(CNNModelBl, self).__init__()
+    def forward(input):
+
 # Create CNN Model
 class CNNModel(nn.Module):
     def __init__(self):
@@ -122,7 +127,94 @@ class CNNModel(nn.Module):
         out = self.fc1(out)
         
         return out
+
+#numOfClass = 4
+#global_step = .5
+#annealing_step = .8
+#tAlpha = torch.tensor([[1, 2, 3, 4],
+#                                     [5, 6, 7, 8], 
+#                                     [9, 1, 2, 3]], dtype = torch.float32)
+#p = torch.tensor([[.4, .2, .5, .3],
+#                            [.1, .4, .2, .6],
+#                            [.6, .8, .3, .6]], dtype = torch.float32)
+
+# KL Divergence calculator
+# Shape of Input:    alpha: r × numOfClass; numOfClass: 1 × 1
+# Shape of Output: r × 1
+def KL(alpha, numOfClass):
+    # beta = tf.constant(np.ones((1, K)), dtype= tf.float32)
+    beta = torch.ones((1, numOfClass), dtype = torch.float32, requires_grad= False)
+    # S_alpha = tf.reduce_sum(alpha, axis=1, keep_dims= True)
+    S_alpha = torch.sum(alpha, dim= 1, keepdims= True)
+    #S_beta = tf.reduce_sum(beta, axis= 1, keep_dims= True)
+    S_beta = torch.sum(beta, dim = 1, keepdims= True)
+    # lnB = tf.lgamma(S_alpha) - tf.reduce_sum(tf.lgamma(alpha), axis=1, keep_dims=True)
+    lnB = torch.lgamma(input= S_alpha) - torch.sum(torch.lgamma(alpha), dim= 1, keepdims= True)
+    # lnB_uni = tf.reduce_sum(tf.lgamma(beta), axis= 1,keep_dims= True) - tf.lgamma(S_beta)
+    lnB_uni = torch.sum(torch.lgamma(beta), dim= 1, keepdims= True) - torch.lgamma(S_beta)
     
+    # dg0 = tf.digamma(S_alpha)
+    dg0 = torch.digamma(input= S_alpha)
+    #dg1 = tf.digamma(alpha)
+    dg1 = torch.digamma(input= alpha)
+    
+    # kl = tf.reduce_sum((alpha - beta)*(dg1-dg0),axis=1,keep_dims=True) + lnB + lnB_uni
+    kl = torch.sum((alpha - beta) * (dg1 - dg0), dim = 1, keepdims= True) + lnB + lnB_uni
+    return kl
+print (KL(tAlpha, numOfClass))
+
+#Shape of Input:    alpha: r × numOfClass; numOfClass: 1 × 1
+#                             global_step: 1 × 1; annealing_step: 1 × 1
+#                             p: r × numOfClass
+# Shape of Output: r × 1
+def loss_eq5(p, alpha, numOfClass, global_step, annealing_step):
+    # S = tf.reduce_sum(alpha, axis=1, keepdims=True)
+    S = torch.sum(alpha, dim = 1, keepdims = True)
+    # loglikelihood = tf.reduce_sum((p-(alpha/S))**2, axis=1, keepdims=True) + \
+    #                        tf.reduce_sum(alpha*(S-alpha)/(S*S*(S+1)), axis=1, keepdims=True)
+    logLikeHood = torch.sum ((p - (alpha / S)) ** 2, dim = 1, keepdims= True) + \
+                              torch.sum (alpha * (S - alpha) / (S * S * (S + 1)), dim = 1, keepdims= True)
+    # KL_reg =  tf.minimum(1.0, tf.cast(global_step/annealing_step, tf.float32)) * \
+    #                  KL((alpha - 1)*(1-p) + 1 , K)
+    KL_reg = min(1.0, float(global_step) / annealing_step) * \
+                     KL((alpha - 1) * (1 - p) + 1, numOfClass)
+    return logLikeHood + KL_reg
+# print (loss_eq5(p, tAlpha, numOfClass, global_step, annealing_step))
+
+#Shape of Input:    alpha: r × numOfClass; numOfClass: 1 × 1
+#                             global_step: 1 × 1; annealing_step: 1 × 1
+#                             p: r × numOfClass
+# Shape of Output: r × 1
+def loss_eq4(p, alpha, numOfClass, global_step, annealing_step):
+    #loglikelihood = tf.reduce_mean(tf.reduce_sum(p * \
+    #                          (tf.digamma(tf.reduce_sum(alpha, axis=1, keepdims=True)) - \
+    #                          tf.digamma(alpha)), 1, keepdims=True))
+    logLikeHood = torch.mean(torch.sum(p * (torch.digamma(torch.sum(alpha, dim= 1, keepdims= True)) - \
+                                                torch.digamma(alpha)), dim= 1, keepdims= True))
+
+    #KL_reg =  tf.minimum(1.0, tf.cast(global_step/annealing_step, tf.float32)) * \
+    #                                    KL((alpha - 1)*(1-p) + 1 , K)
+    KL_reg = min(1.0, float(global_step) / annealing_step) * \
+                     KL((alpha - 1) * (1 - p) + 1 , numOfClass)
+
+    return logLikeHood + KL_reg
+# print (loss_eq4(p, tAlpha, numOfClass, global_step, annealing_step))
+
+#Shape of Input:    alpha: r × numOfClass; numOfClass: 1 × 1
+#                             global_step: 1 × 1; annealing_step: 1 × 1
+#                             p: r × numOfClass
+# Shape of Output: r × 1
+def loss_eq3(p, alpha, K, global_step, annealing_step):
+    #loglikelihood = tf.reduce_mean(tf.reduce_sum(p * (tf.log(tf.reduce_sum(alpha, axis=1, keepdims=True)) - tf.log(alpha)), 1, keepdims=True))
+    logLikeHood = torch.mean (torch.sum (p * torch.log(torch.sum (alpha, dim= 1, keepdims= True)) - \
+                              torch.log (alpha), dim = 1, keepdims= True))
+
+    #KL_reg =  tf.minimum(1.0, tf.cast(global_step/annealing_step, tf.float32)) * KL((alpha - 1)*(1-p) + 1 , K)
+    KL_reg = min(1.0, float(global_step) / annealing_step) * \
+                     KL((alpha - 1) * (1 - p) + 1 , numOfClass)
+    return logLikeHood + KL_reg
+# print (loss_eq3(p, tAlpha, numOfClass, global_step, annealing_step))
+
 # Create ANN
 # model = CNNModel()
 model = CNNModelSf();
