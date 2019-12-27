@@ -15,6 +15,7 @@ targets = npzfile['arr_1']
 
 # Apply Relu
 outputs = outputs * (outputs > 0) 
+
 # Comp prob
 Se = np.sum(outputs,axis=1)
 Se = np.expand_dims(Se, axis=0)
@@ -47,6 +48,7 @@ for i in range(Be.shape[0]):
       classes.append(ibs)
       beliefs.append(Bes)
       probas.append(Prs)
+
 classes = np.concatenate(classes, axis=0)
 classes = classes.reshape(outputs.shape)
 beliefs = np.concatenate(beliefs, axis=0)
@@ -81,9 +83,11 @@ for th in  np.linspace(0, 1, num=nb):
       nbClPr = np.sum(maskPr,axis=1)
       meanClBe = np.mean(nbClBe)
       meanClPr = np.mean(nbClPr)
+
       # look for classes
       compBe = (classesBe == targetsTable)
       compPr = (classesPr == targetsTable)
+
       # Get Accuracy
       accBe = sum(compBe.flatten()) / outputs.shape[0] * 100
       accPr = sum(compPr.flatten()) / outputs.shape[0] * 100

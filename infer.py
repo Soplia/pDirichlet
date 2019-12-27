@@ -10,9 +10,8 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 import pandas as pd 
 import numpy as np 
-from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt 
-from torch.utils.tensorboard import SummaryWriter
+# from torch.utils.tensorboard import SummaryWriter
 # import pdb
 
 # Create CNN Model
@@ -54,37 +53,66 @@ class CNNModel( nn.Module ):
         
         return out
 
+# Define a class CNNmodelSf with the classical softmax
+class CNNModelSf(nn.Module):
+    def __init__(self):
+        super(CNNModelSf, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels= 1, out_channels= 20, stride= 1, 
+                                                kernel_size= 5, padding= 0)
+        self.conv2 = nn.Conv2d(in_channels= 20, out_channels= 50, stride= 1, 
+                                                kernel_size= 5, padding= 0)
+
+        self.fc1 = nn.Linear(4 * 4 * 50, 500)
+        self.fc2 = nn.Linear(500, 10)
+
+        self.relu = nn.ReLU()
+        self.maxPool = nn.MaxPool2d(kernel_size= 2)
+
+    def forward(self, input):
+        out1 = self.maxPool(self.relu(self.conv1(input)))
+        out2 = self.maxPool(self.relu(self.conv2(out1)))
+
+        out3 = self.fc1(out2.view(out2.size(0), -1))
+        out = self.fc2(out3)
+        return out
+
 ################
 #Start main
 ################
 # Loadding testing set
 npzfile = np.load('../data/test.npz')
 features_test = npzfile['arr_0']
+
 # Add some noise to the feature_test
 Amp = 0.2 #between 0 and 1
 noise = np.random.randn(features_test.shape[0], features_test.shape[1])
 # pdb.set_trace()
 features_test = features_test + noise.astype(dtype = 'float32')
 features_test = np.clip(features_test,0,1)
-#plt.plot(SclBe,SaccBe)
 targets_test = npzfile['arr_1']
+
 # Create feature and targets tensor for test set.
 featuresTest = torch.from_numpy(features_test)
 targetsTest = torch.from_numpy(targets_test).type(torch.LongTensor) 
 test = torch.utils.data.TensorDataset(featuresTest, targetsTest)
+
 # Dataloader
+test_loader = torch.utils.data.DataLoader(test, 
+                                                                   batch_size = batch_size, 
+                                                                   shuffle = False)
 batch_size = 100
 n_iters = 1
 num_epochs = n_iters / (len(features_test) / batch_size)
 num_epochs = int(num_epochs)
-test_loader = torch.utils.data.DataLoader(test, 
-                                                                   batch_size = batch_size, 
-                                                                   shuffle = False)
+
 # Define NN model
-model = CNNModel()
+# model = CNNModel()
+model = CNNModelSf()
+
 # Loading model
 model.load_state_dict(torch.load('../data/model.pt'))
 #model = torch.load('model.pth')
+
 # Infer on testing set
 correct = 0
 total = 0
@@ -102,7 +130,6 @@ for images, labels in test_loader:
           # Total number of labels
           total += len(labels)
           correct += (predicted == labels).sum()
-
 
 outputsave = torch.cat(outputsave, dim=0)
 labelssave = torch.cat(labelssave, dim=0)
