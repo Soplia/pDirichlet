@@ -44,7 +44,7 @@ targetsTest = torch.from_numpy(targets_test).type(torch.LongTensor)
 
 # batch_size, epoch and iteration
 batch_size = 100
-n_iters = 50000
+n_iters = 5000
 num_epochs = n_iters / (len(features_train) / batch_size)
 num_epochs = int(num_epochs)
 print(f'{num_epochs} epochs in training')
@@ -60,6 +60,29 @@ train_loader = torch.utils.data.DataLoader(train,
 test_loader = torch.utils.data.DataLoader(test, 
                                                                    batch_size = batch_size, 
                                                                    shuffle = False)
+
+# Define a class CNNmodelSf with the classical softmax
+class CNNModelSf(nn.Module):
+    def __init__(self):
+        super(CNNModelSf, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels= 1, out_channels= 20, stride= 1, 
+                                                kernel_size= 5, padding= 0)
+        self.conv2 = nn.Conv2d(in_channels= 20, out_channels= 50, stride= 1, 
+                                                kernel_size= 5, padding= 0)
+
+        self.fc1 = nn.Linear(4 * 4 * 50, 500)
+        self.fc2 = nn.Linear(500, 10)
+
+        self.relu = nn.ReLU()
+        self.maxPool = nn.MaxPool2d(kernel_size= 2)
+
+    def forward(self, input):
+        out1 = self.maxPool(self.relu(self.conv1(input)))
+        out2 = self.maxPool(self.relu(self.conv2(out1)))
+
+        out3 = self.fc1(out2.view(out2.size(0), -1))
+        out = self.fc2(out3)
+        return out
 
 # Create CNN Model
 class CNNModel(nn.Module):
@@ -101,7 +124,8 @@ class CNNModel(nn.Module):
         return out
     
 # Create ANN
-model = CNNModel()
+# model = CNNModel()
+model = CNNModelSf();
 # Cross Entropy Loss
 error = nn.CrossEntropyLoss()
 # SGD Optimizer
@@ -113,7 +137,7 @@ count = 0
 loss_list = []
 iteration_list = []
 accuracy_list = []
-writer = SummaryWriter('../boardx/mnistC')
+# writer = SummaryWriter('../boardx/mnistC')
 
 for epoch in range(num_epochs):
     print('Training-epoch: {}'.format(epoch + 1))
