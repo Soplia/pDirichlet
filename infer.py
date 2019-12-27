@@ -1,3 +1,10 @@
+"""
+It loads the model and the testing set 
+(because the split between train and test is achieved into the training function) 
+and generates a table with beliefs and probabilities. 
+In order to provide more challenging images, 
+I generate an additional Gaussian noise on pixels gray levels
+"""
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
@@ -55,7 +62,7 @@ npzfile = np.load('../data/test.npz')
 features_test = npzfile['arr_0']
 # Add some noise to the feature_test
 Amp = 0.2 #between 0 and 1
-noise = np.random.randn(features_test.shape[0],features_test.shape[1])
+noise = np.random.randn(features_test.shape[0], features_test.shape[1])
 # pdb.set_trace()
 features_test = features_test + noise.astype(dtype = 'float32')
 features_test = np.clip(features_test,0,1)
@@ -84,17 +91,19 @@ total = 0
 outputsave = []
 labelssave = []
 for images, labels in test_loader:
- with torch.no_grad():
-  test = images.view(100, 1, 28, 28)
-  # Forward propagation
-  outputs = model(test)
-  outputsave.append(outputs)
-  labelssave.append(labels)
-  # Get predictions from the maximum value
-  _, predicted = torch.max(outputs.data, 1)
-  # Total number of labels
-  total += len(labels)
-  correct += (predicted == labels).sum()
+    with torch.no_grad():
+          test = images.view(100, 1, 28, 28)
+          # Forward propagation
+          outputs = model(test)
+          outputsave.append(outputs)
+          labelssave.append(labels)
+          # Get predictions from the maximum value
+          _, predicted = torch.max(outputs.data, 1)
+          # Total number of labels
+          total += len(labels)
+          correct += (predicted == labels).sum()
+
+
 outputsave = torch.cat(outputsave, dim=0)
 labelssave = torch.cat(labelssave, dim=0)
 accuracy = 100 * correct.numpy() / float(total)
