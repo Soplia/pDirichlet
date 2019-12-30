@@ -14,45 +14,32 @@ import matplotlib.pyplot as plt
 # from torch.utils.tensorboard import SummaryWriter
 # import pdb
 
+keepProb = .5
 # Create CNN Model
-class CNNModel( nn.Module ):
-    def __init__( self ):
-        super(CNNModel, self).__init__()        
-        # Convolution 1
-        self.cnn1 = nn.Conv2d(in_channels=1, out_channels=16, kernel_size=5, stride=1, padding=0)
-        self.relu1 = nn.ReLU()
-        # Max pool 1
-        self.maxpool1 = nn.MaxPool2d(kernel_size=2)
-     
-        # Convolution 2
-        self.cnn2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=5, stride=1, padding=0)
-        self.relu2 = nn.ReLU()
-        # Max pool 2
-        self.maxpool2 = nn.MaxPool2d(kernel_size=2)
-        
-        # Fully connected 1
-        self.fc1 = nn.Linear(32 * 4 * 4, 10) 
-    
-    def forward( self, x ):
-        # Convolution 1
-        out = self.cnn1(x)
-        out = self.relu1(out)
-        # Max pool 1
-        out = self.maxpool1(out)
-        
-        # Convolution 2
-        out = self.cnn2(out)
-        out = self.relu2(out)
-        # Max pool 2
-        out = self.maxpool2(out)
+class CNNModel(nn.Module):
+    def __init__(self):
+        super(CNNModel, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels= 1, out_channels= 20, stride= 1, 
+                                                kernel_size= 5, padding= 0)
+        self.conv2 = nn.Conv2d(in_channels= 20, out_channels= 50, stride= 1, 
+                                                kernel_size= 5, padding= 0)
 
-        out = out.view(out.size(0), -1)
+        self.fc1 = nn.Linear(4 * 4 * 50, 500)
+        self.fc2 = nn.Linear(500, 10)
 
-        # Linear function (readout)
-        out = self.fc1(out)
-        
-        return out
+        self.relu = nn.ReLU()
+        self.maxPool = nn.MaxPool2d(kernel_size= 2)
+        self.dropout = nn.Dropout(keepProb)
 
+    def forward(self, input):
+        out1 = self.maxPool(self.relu(self.conv1(input)))
+        out2 = self.maxPool(self.relu(self.conv2(out1)))
+
+        #out3 = self.fc1(out2.view(out2.size(0), -1))
+        #out3 = self.relu(self.fc1(out2.view(out2.size(0), -1))
+        out3 = self.dropout(self.relu(self.fc1(out2.view(out2.size(0), -1))))
+        out4 = self.fc2(out3)
+        return out4
 # Define a class CNNmodelSf with the classical softmax
 class CNNModelSf(nn.Module):
     def __init__(self):
@@ -106,8 +93,8 @@ test_loader = torch.utils.data.DataLoader(test,
                                                                    batch_size = batch_size, 
                                                                    shuffle = False)
 # Define NN model
-# model = CNNModel()
-model = CNNModelSf()
+model = CNNModel()
+#model = CNNModelSf()
 
 # Loading model
 model.load_state_dict(torch.load('../data/model.pt'))
