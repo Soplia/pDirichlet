@@ -96,15 +96,15 @@ featuresTest = torch.from_numpy(features_test)
 targetsTest = torch.from_numpy(targets_test).type(torch.LongTensor) 
 test = torch.utils.data.TensorDataset(featuresTest, targetsTest)
 
-# Dataloader
-test_loader = torch.utils.data.DataLoader(test, 
-                                                                   batch_size = batch_size, 
-                                                                   shuffle = False)
 batch_size = 100
 n_iters = 1
 num_epochs = n_iters / (len(features_test) / batch_size)
 num_epochs = int(num_epochs)
 
+# Dataloader
+test_loader = torch.utils.data.DataLoader(test, 
+                                                                   batch_size = batch_size, 
+                                                                   shuffle = False)
 # Define NN model
 # model = CNNModel()
 model = CNNModelSf()
@@ -112,7 +112,6 @@ model = CNNModelSf()
 # Loading model
 model.load_state_dict(torch.load('../data/model.pt'))
 #model = torch.load('model.pth')
-
 # Infer on testing set
 correct = 0
 total = 0
@@ -130,6 +129,7 @@ for images, labels in test_loader:
           # Total number of labels
           total += len(labels)
           correct += (predicted == labels).sum()
+
 
 outputsave = torch.cat(outputsave, dim=0)
 labelssave = torch.cat(labelssave, dim=0)

@@ -60,77 +60,10 @@ train_loader = torch.utils.data.DataLoader(train,
 test_loader = torch.utils.data.DataLoader(test, 
                                                                    batch_size = batch_size, 
                                                                    shuffle = False)
-
-# Define a class CNNmodelSf with the classical softmax
-class CNNModelSf(nn.Module):
-    def __init__(self):
-        super(CNNModelSf, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels= 1, out_channels= 20, stride= 1, 
-                                                kernel_size= 5, padding= 0)
-        self.conv2 = nn.Conv2d(in_channels= 20, out_channels= 50, stride= 1, 
-                                                kernel_size= 5, padding= 0)
-
-        self.fc1 = nn.Linear(4 * 4 * 50, 500)
-        self.fc2 = nn.Linear(500, 10)
-
-        self.relu = nn.ReLU()
-        self.maxPool = nn.MaxPool2d(kernel_size= 2)
-
-    def forward(self, input):
-        out1 = self.maxPool(self.relu(self.conv1(input)))
-        out2 = self.maxPool(self.relu(self.conv2(out1)))
-
-        out3 = self.fc1(out2.view(out2.size(0), -1))
-        out = self.fc2(out3)
-        return out
-
-class CNNModelBl(nn.Module):
-    def __init__(self):
-        super(CNNModelBl, self).__init__()
-    def forward(input):
-
-# Create CNN Model
-class CNNModel(nn.Module):
-    def __init__(self):
-        super(CNNModel, self).__init__()        
-        # Convolution 1
-        self.cnn1 = nn.Conv2d(in_channels=1, out_channels=16, kernel_size=5, stride=1, padding=0)
-        self.relu1 = nn.ReLU()
-        # Max pool 1
-        self.maxpool1 = nn.MaxPool2d(kernel_size=2)
-     
-        # Convolution 2
-        self.cnn2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=5, stride=1, padding=0)
-        self.relu2 = nn.ReLU()
-        # Max pool 2
-        self.maxpool2 = nn.MaxPool2d(kernel_size=2)
-        
-        # Fully connected 1
-        self.fc1 = nn.Linear(32 * 4 * 4, 10) 
-    
-    def forward(self, x):
-        # Convolution 1
-        out = self.cnn1(x)
-        out = self.relu1(out)
-        # Max pool 1
-        out = self.maxpool1(out)
-        
-        # Convolution 2
-        out = self.cnn2(out)
-        out = self.relu2(out)
-        # Max pool 2
-        out = self.maxpool2(out)
-
-        out = out.view(out.size(0), -1)
-
-        # Linear function (readout)
-        out = self.fc1(out)
-        
-        return out
-
+numOfClass = 10
 #numOfClass = 4
-#global_step = .5
-#annealing_step = .8
+global_step = .5
+annealing_step = .8
 #tAlpha = torch.tensor([[1, 2, 3, 4],
 #                                     [5, 6, 7, 8], 
 #                                     [9, 1, 2, 3]], dtype = torch.float32)
@@ -161,7 +94,7 @@ def KL(alpha, numOfClass):
     # kl = tf.reduce_sum((alpha - beta)*(dg1-dg0),axis=1,keep_dims=True) + lnB + lnB_uni
     kl = torch.sum((alpha - beta) * (dg1 - dg0), dim = 1, keepdims= True) + lnB + lnB_uni
     return kl
-print (KL(tAlpha, numOfClass))
+# print (KL(tAlpha, numOfClass))
 
 #Shape of Input:    alpha: r × numOfClass; numOfClass: 1 × 1
 #                             global_step: 1 × 1; annealing_step: 1 × 1
@@ -204,7 +137,7 @@ def loss_eq4(p, alpha, numOfClass, global_step, annealing_step):
 #                             global_step: 1 × 1; annealing_step: 1 × 1
 #                             p: r × numOfClass
 # Shape of Output: r × 1
-def loss_eq3(p, alpha, K, global_step, annealing_step):
+def loss_eq3(p, alpha, numOfClass, global_step, annealing_step):
     #loglikelihood = tf.reduce_mean(tf.reduce_sum(p * (tf.log(tf.reduce_sum(alpha, axis=1, keepdims=True)) - tf.log(alpha)), 1, keepdims=True))
     logLikeHood = torch.mean (torch.sum (p * torch.log(torch.sum (alpha, dim= 1, keepdims= True)) - \
                               torch.log (alpha), dim = 1, keepdims= True))
@@ -215,9 +148,47 @@ def loss_eq3(p, alpha, K, global_step, annealing_step):
     return logLikeHood + KL_reg
 # print (loss_eq3(p, tAlpha, numOfClass, global_step, annealing_step))
 
+# Three types evidence
+def relu_evidence(logits):
+    #return torch.nn.ReLU(logits)
+    logits[logits < 0] = 0
+    return logits
+
+def exp_evidence(logits): 
+    return torch.exp(logits / 1000)
+
+def softmax_evidence(logits):
+    return torch.nn.Softmax(logits)
+
+#Computes half the L2 norm of a tensor without the sqrt
+def L2Loss(inputs):
+    return torch.sum(inputs ** 2) / 2
+
+# Define a class CNNmodelSf with the classical softmax
+class CNNModel(nn.Module):
+    def __init__(self):
+        super(CNNModel, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels= 1, out_channels= 20, stride= 1, 
+                                                kernel_size= 5, padding= 0)
+        self.conv2 = nn.Conv2d(in_channels= 20, out_channels= 50, stride= 1, 
+                                                kernel_size= 5, padding= 0)
+
+        self.fc1 = nn.Linear(4 * 4 * 50, 500)
+        self.fc2 = nn.Linear(500, 10)
+
+        self.relu = nn.ReLU()
+        self.maxPool = nn.MaxPool2d(kernel_size= 2)
+
+    def forward(self, input):
+        out1 = self.maxPool(self.relu(self.conv1(input)))
+        out2 = self.maxPool(self.relu(self.conv2(out1)))
+
+        out3 = self.fc1(out2.view(out2.size(0), -1))
+        out4 = self.fc2(out3)
+        return out4
+
 # Create ANN
-# model = CNNModel()
-model = CNNModelSf();
+model = CNNModel();
 # Cross Entropy Loss
 error = nn.CrossEntropyLoss()
 # SGD Optimizer
@@ -231,23 +202,40 @@ iteration_list = []
 accuracy_list = []
 # writer = SummaryWriter('../boardx/mnistC')
 
-for epoch in range(num_epochs):
+# CNNModel with softmax cross entropy loss function
+# for epoch in range(num_epochs):
+for epoch in range(8):
     print('Training-epoch: {}'.format(epoch + 1))
     for i, (images, labels) in enumerate(train_loader):
-        train = images.view(100,1,28,28)
+        train = images.view(100, 1, 28, 28)
         # Clear gradients
         optimizer.zero_grad()
         # Forward propagation
-        outputs = model(train)       
+        outputs = model(train) 
+        #print ('The grad_fn of outputs: {}'.format(outputs.requires_grad))
         # Calculate softmax and ross entropy loss
-        loss = error(outputs, labels)
+        # loss = error(outputs, labels)
+
+        evidence = relu_evidence(outputs)
+        #print ('The grad_fn of evidence: {}'.format(evidence.requires_grad))
+        alpha = evidence + 1
+
+        u = numOfClass / torch.sum(alpha, dim = 1, keepdims = True)
+        pro = alpha / torch.sum (alpha, dim = 1, keepdims = True)
+        #print ('The grad_fn of pro: {}'.format(pro.requires_grad))
+
+        loss = torch.mean(loss_eq3(pro, alpha, numOfClass, global_step, annealing_step))
+        #print ('The shape of loss: {}'.format(loss.shape))
+        #print ('Uncertainty: {}'.format(u))
+       
         # Calculating gradients
         loss.backward()
         # Update parameters
         optimizer.step()
 
+print ('Finish Training')
 # save model
-torch.save(model.state_dict(),'../data/model.pt')
+torch.save(model.state_dict(), '../data/model.pt')
 # save testing dataset
 np.savez('../data/test.npz', features_test, targets_test)
 #torch.save(model,'model.pth')
