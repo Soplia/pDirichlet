@@ -21,14 +21,14 @@ if os.path.isdir('./mnistC'):
     shutil.rmtree('./mnistC')
     print('Finish deleting')
 '''
-
 train = pd.read_csv("../data/train.csv", dtype = np.float32)
+
 # Split data into features(pixels) and labels(numbers from 0 to 9)
 targets_numpy = train.label.values
 # Normalization
 features_numpy = train.loc[:, train.columns != "label"].values / 255
 
-# Train test split.  Size of train data is 80% and size of test data is 20%.
+# Train test split.  Size of train data is 90% and size of test data is 10%.
 features_train, features_test, targets_train, targets_test = train_test_split(features_numpy,
                                                                                                                     targets_numpy,
                                                                                                                     test_size = 0.1,
@@ -42,11 +42,16 @@ targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor)
 featuresTest = torch.from_numpy(features_test)
 targetsTest = torch.from_numpy(targets_test).type(torch.LongTensor) 
 
-# batch_size, epoch and iteration
-batch_size = 100
+# Utility parameters
 n_iters = 5000
-num_epochs = n_iters / (len(features_train) / batch_size)
-num_epochs = int(num_epochs)
+batch_size = 100
+num_epochs = int(n_iters / (len(features_train) / batch_size))
+numOfClass = 10
+global_step = 0
+n_batches = len(features_train)  // batch_size
+annealing_step = 10 * n_batches
+lmb = 0.005
+keepProb = .5
 print(f'{num_epochs} epochs in training')
 
 # Pytorch train and test sets
@@ -60,10 +65,9 @@ train_loader = torch.utils.data.DataLoader(train,
 test_loader = torch.utils.data.DataLoader(test, 
                                                                    batch_size = batch_size, 
                                                                    shuffle = False)
-numOfClass = 10
-#numOfClass = 4
-global_step = .5
-annealing_step = .8
+
+
+
 #tAlpha = torch.tensor([[1, 2, 3, 4],
 #                                     [5, 6, 7, 8], 
 #                                     [9, 1, 2, 3]], dtype = torch.float32)
@@ -178,12 +182,15 @@ class CNNModel(nn.Module):
 
         self.relu = nn.ReLU()
         self.maxPool = nn.MaxPool2d(kernel_size= 2)
+        self.dropout = nn.Dropout(keepProb)
 
     def forward(self, input):
         out1 = self.maxPool(self.relu(self.conv1(input)))
         out2 = self.maxPool(self.relu(self.conv2(out1)))
 
-        out3 = self.fc1(out2.view(out2.size(0), -1))
+        #out3 = self.fc1(out2.view(out2.size(0), -1))
+        #out3 = self.relu(self.fc1(out2.view(out2.size(0), -1))
+        out3 = self.dropout(self.relu(self.fc1(out2.view(out2.size(0), -1))))
         out4 = self.fc2(out3)
         return out4
 
@@ -204,7 +211,10 @@ accuracy_list = []
 
 # CNNModel with softmax cross entropy loss function
 # for epoch in range(num_epochs):
-for epoch in range(8):
+list = []
+lossList = []
+for epoch in range(5):
+    lossList.clear()
     print('Training-epoch: {}'.format(epoch + 1))
     for i, (images, labels) in enumerate(train_loader):
         train = images.view(100, 1, 28, 28)
@@ -225,19 +235,40 @@ for epoch in range(8):
         #print ('The grad_fn of pro: {}'.format(pro.requires_grad))
 
         loss = torch.mean(loss_eq3(pro, alpha, numOfClass, global_step, annealing_step))
+        l2Loss = (L2Loss(model.state_dict()['fc1.weight']) + 
+                        L2Loss(model.state_dict()['fc2.weight'])) * lmb 
         #print ('The shape of loss: {}'.format(loss.shape))
         #print ('Uncertainty: {}'.format(u))
-       
+        
+        lossList.append(loss)
+        
         # Calculating gradients
         loss.backward()
         # Update parameters
         optimizer.step()
+    list.append(lossList)
+    plt.plot(lossList)
+    plt.show()
 
 print ('Finish Training')
 # save model
 torch.save(model.state_dict(), '../data/model.pt')
 # save testing dataset
 np.savez('../data/test.npz', features_test, targets_test)
+
+np.savez('../data/list.npz', list)
+
+numCol = 4
+numRow = ceil(5 / numCol)
+plt.figure(figsize= (17, 14))
+for i in range(numRow):
+    for j in range(numCol):
+        plt.subplot(numCol * numRow, i, j)
+        plt.plot(list[i * numCol + j, :], ls= '-', color= 'r', label= i * numCol + j + 1 + 'st')
+        plt.title('Loss' + i * numCol + j + 1)
+        plt.ylabel('LossV')
+        plt.legend(loc= 0)
+
 #torch.save(model,'model.pth')
 
 #count += 1
