@@ -1,1 +1,3 @@
 *.pyproj
+*.vscode/
+MNIST_data/

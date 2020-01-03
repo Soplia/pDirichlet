@@ -5,6 +5,7 @@ This training is the one with a cross-entropy training error
 """
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torchvision.transforms as transforms
 import pandas as pd 
 import numpy as np 
@@ -38,12 +39,11 @@ n_iters = 5000
 batch_size = 100
 num_epochs = int(n_iters / (len(features_train) / batch_size))
 numOfClass = 10
-global_step = 0
+global_step = 100
 n_batches = len(features_train)  // batch_size
 annealing_step = 10 * n_batches
 lmb = 0.005
 learning_rate = 0.1
-keepProb = .5
 print(f'{num_epochs} epochs in training')
 
 # Pytorch train and test sets
@@ -123,25 +123,23 @@ def loss_eq4(p, alpha, numOfClass, global_step, annealing_step):
 # Shape of Output: r × 1
 def loss_eq3(p, alpha, numOfClass, global_step, annealing_step):
     #loglikelihood = tf.reduce_mean(tf.reduce_sum(p * (tf.log(tf.reduce_sum(alpha, axis=1, keepdims=True)) - tf.log(alpha)), 1, keepdims=True))
-    logLikeHood = torch.mean (torch.sum (p * torch.log(torch.sum (alpha, dim= 1, keepdims= True)) - \
-                              torch.log (alpha), dim = 1, keepdims= True))
+    logLikeHood = torch.mean(torch.sum(p * torch.log(torch.sum(alpha, dim= 1, keepdims= True)) - \
+                              torch.log(alpha), dim= 1, keepdims= True))
 
     #KL_reg =  tf.minimum(1.0, tf.cast(global_step/annealing_step, tf.float32)) * KL((alpha - 1)*(1-p) + 1 , K)
     KL_reg = min(1.0, float(global_step) / annealing_step) * \
-                     KL((alpha - 1) * (1 - p) + 1 , numOfClass)
+                     KL((alpha - 1) * (1 - p) + 1, numOfClass)
     return logLikeHood + KL_reg
 
 # Three types evidence
 def relu_evidence(logits):
-    #return torch.nn.ReLU(logits)
-    logits[logits < 0] = 0
-    return logits
+    return F.relu(logits)
 
 def exp_evidence(logits): 
     return torch.exp(logits / 1000)
 
 def softmax_evidence(logits):
-    return torch.nn.Softmax(logits)
+    return F.softmax(logits)
 
 #Computes half the L2 norm of a tensor without the sqrt
 def L2Loss(inputs):
@@ -161,7 +159,7 @@ class CNNModel(nn.Module):
 
         self.relu = nn.ReLU()
         self.maxPool = nn.MaxPool2d(kernel_size= 2)
-        self.dropout = nn.Dropout(keepProb)
+        self.dropout = nn.Dropout(.5)
 
     def forward(self, input):
         out1 = self.maxPool(self.relu(self.conv1(input)))
@@ -173,7 +171,7 @@ class CNNModel(nn.Module):
 # Create ANN
 model = CNNModel();
 # SGD Optimizer
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.SGD(model.parameters(), lr= learning_rate)
 
 # CNNModel with softmax cross entropy loss function
 list = []
@@ -182,6 +180,12 @@ for epoch in range(8):
     lossList.clear()
     print('Training-epoch: {}'.format(epoch + 1))
     for i, (images, labels) in enumerate(train_loader):
+        newLabels = torch.zeros((labels.shape[0], 10), dtype= torch.float32)
+        cnt = 0
+        for pos in labels:
+            newLabels[cnt, pos] = 1.0
+            cnt += 1
+
         train = images.view(100, 1, 28, 28)
         # Clear gradients
         optimizer.zero_grad()
@@ -198,8 +202,9 @@ for epoch in range(8):
         u = numOfClass / torch.sum(alpha, dim = 1, keepdims = True)
         pro = alpha / torch.sum (alpha, dim = 1, keepdims = True)
         #print ('The grad_fn of pro: {}'.format(pro.requires_grad))
-
-        loss = torch.mean(loss_eq3(pro, alpha, numOfClass, global_step, annealing_step))
+        
+        # Should not input pro, must be the real label
+        loss = torch.mean(loss_eq3(newLabels, alpha, numOfClass, global_step, annealing_step))
         l2Loss = (L2Loss(model.state_dict()['fc1.weight']) + 
                         L2Loss(model.state_dict()['fc2.weight'])) * lmb 
         #print ('The shape of loss: {}'.format(loss.shape))
