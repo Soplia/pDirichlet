@@ -23,6 +23,12 @@ Se = np.repeat(Se, outputs.shape[1],axis = 0)
 Se = np.transpose(Se)
 Pr = outputs / Se
 
+
+# evidence = relu_evidence(outputs)
+# alpha = evidence + 1
+# u = numOfClass / torch.sum(alpha, dim = 1, keepdims = True)
+# pro = alpha / torch.sum (alpha, dim = 1, keepdims = True)
+
 # Comp Belief
 alpha = outputs + 1
 Sa = np.sum(alpha,axis=1)
@@ -95,8 +101,8 @@ for th in  np.linspace(0, 1, num=nb):
       SclPr.append(meanClPr)
       SaccBe.append(accBe)
       SaccPr.append(accPr)
-      print(f'accBe = {accBe}, mean classes = {meanClBe}')
-      print(f'accPr = {accPr}, mean classes = {meanClPr}')
+      # print(f'accBe = {accBe}, mean classes = {meanClBe}')
+      # print(f'accPr = {accPr}, mean classes = {meanClPr}')
 
 plt.plot(SclBe,SaccBe,label='Using Belief threshold')
 plt.plot(SclPr,SaccPr,label='Using SoftMax threshold')
@@ -104,6 +110,4 @@ plt.legend()
 plt.title('Accuracy vs Mean nb of candidates')
 plt.show()
 #pdb.set_trace()
-
-
 

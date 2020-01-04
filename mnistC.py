@@ -23,7 +23,7 @@ features_numpy = train.loc[:, train.columns != "label"].values / 255
 # Train test split.  Size of train data is 90% and size of test data is 10%.
 features_train, features_test, targets_train, targets_test = train_test_split(features_numpy,
                                                                                                                     targets_numpy,
-                                                                                                                    test_size = 0.1,
+                                                                                                                    test_size = 0.2,
                                                                                                                     random_state = 42) 
 # pdb.set_trace()
 # Create feature and targets tensor for train set.
@@ -39,6 +39,8 @@ n_iters = 5000
 batch_size = 100
 num_epochs = int(n_iters / (len(features_train) / batch_size))
 numOfClass = 10
+# I am not sure about this paramter, it intilizised as 0,
+# but I adopt 100
 global_step = 100
 n_batches = len(features_train)  // batch_size
 annealing_step = 10 * n_batches
@@ -57,6 +59,7 @@ train_loader = torch.utils.data.DataLoader(train,
 test_loader = torch.utils.data.DataLoader(test, 
                                                                    batch_size = batch_size, 
                                                                    shuffle = False)
+
 
 # KL Divergence calculator
 # Shape of Input:    alpha: r × numOfClass; numOfClass: 1 × 1
@@ -169,17 +172,24 @@ class CNNModel(nn.Module):
         return out4
 
 # Create ANN
-model = CNNModel();
+model = CNNModel()
 # SGD Optimizer
 optimizer = torch.optim.SGD(model.parameters(), lr= learning_rate)
+# error = torch.nn.MSELoss()
 
 # CNNModel with softmax cross entropy loss function
-list = []
-lossList = []
+acc1d = []
+acc2d = []
+loss1d = []
+loss2d = []
+fig, axes = plt.subplots(nrows= 2, ncols= 1)
 for epoch in range(8):
-    lossList.clear()
+    acc1d.clear()
+    loss1d.clear()
     print('Training-epoch: {}'.format(epoch + 1))
     for i, (images, labels) in enumerate(train_loader):
+        # Change the shape of labels from (images.shape[0]) to 
+        # (images.shape[0], 10)
         newLabels = torch.zeros((labels.shape[0], 10), dtype= torch.float32)
         cnt = 0
         for pos in labels:
@@ -191,40 +201,45 @@ for epoch in range(8):
         optimizer.zero_grad()
         # Forward propagation
         outputs = model(train) 
-        #print ('The grad_fn of outputs: {}'.format(outputs.requires_grad))
-        # Calculate softmax and ross entropy loss
-        # loss = error(outputs, labels)
-
         evidence = relu_evidence(outputs)
-        #print ('The grad_fn of evidence: {}'.format(evidence.requires_grad))
         alpha = evidence + 1
-
         u = numOfClass / torch.sum(alpha, dim = 1, keepdims = True)
         pro = alpha / torch.sum (alpha, dim = 1, keepdims = True)
-        #print ('The grad_fn of pro: {}'.format(pro.requires_grad))
+        acc = torch.sum(torch.argmax(outputs, dim= 1).view(-1, 1) ==
+                torch.argmax(newLabels, dim= 1).view(-1, 1)).item() / newLabels.shape[0]
+        #print ('Acc:', acc)
+        acc1d.append(acc)
+
+        #Calculate softmax and ross entropy loss
+        #loss = error(outputs, newLabels)
         
         # Should not input pro, must be the real label
-        loss = torch.mean(loss_eq3(newLabels, alpha, numOfClass, global_step, annealing_step))
+        loss = torch.mean(loss_eq5(newLabels, alpha, numOfClass, global_step, annealing_step))
         l2Loss = (L2Loss(model.state_dict()['fc1.weight']) + 
-                        L2Loss(model.state_dict()['fc2.weight'])) * lmb 
-        #print ('The shape of loss: {}'.format(loss.shape))
-        #print ('Uncertainty: {}'.format(u))
+                         L2Loss(model.state_dict()['fc2.weight'])) * lmb 
         
-        lossList.append(loss)
-        
+        loss1d.append(loss + l2Loss)
         # Calculating gradients
-        loss.backward()
+        (loss + l2Loss).backward()
         # Update parameters
         optimizer.step()
-    list.append(lossList)
-    plt.plot(lossList, label= 'Epoch{}'.format(epoch + 1))
-    plt.xlabel('Iters')
-    plt.ylabel('LossVal')
-plt.legend(loc= 0)
-plt.show()
+    axes[0].plot(acc1d)
+    axes[1].plot(loss1d)
+    acc2d.append(acc1d)
+    loss2d.append(loss1d)
 
 print ('Finish Training')
+
 # save model
 torch.save(model.state_dict(), '../data/model.pt')
+# save accuracy and loss during training the model
+torch.save(acc2d, '../data/accTrain.pt')
+torch.save(loss2d, '../data/lossTrain.pt')
 # save testing dataset
 np.savez('../data/test.npz', features_test, targets_test)
+
+print ('Finish Saving Files')
+axes[0].set_ylabel('AccVal')
+axes[1].set_ylabel('LossVal')
+axes[1].set_xlabel('Epoch')
+plt.show()
