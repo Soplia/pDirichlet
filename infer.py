@@ -28,12 +28,11 @@ class CNNModel(nn.Module):
 
         self.relu = nn.ReLU()
         self.maxPool = nn.MaxPool2d(kernel_size= 2)
-        self.dropout = nn.Dropout(keepProb)
+        self.dropout = nn.Dropout(.5)
 
     def forward(self, input):
         out1 = self.maxPool(self.relu(self.conv1(input)))
         out2 = self.maxPool(self.relu(self.conv2(out1)))
-
         out3 = self.dropout(self.relu(self.fc1(out2.view(out2.size(0), -1))))
         out4 = self.fc2(out3)
         return out4
@@ -81,21 +80,21 @@ outputsave = []
 labelssave = []
 for images, labels in test_loader:
     with torch.no_grad():
-          test = images.view(100, 1, 28, 28)
-          # Forward propagation
-          outputs = model(test)
-          outputsave.append(outputs)
-          labelssave.append(labels)
-          # Get predictions from the maximum value
-          _, predicted = torch.max(outputs.data, 1)
-          # Total number of labels
-          total += len(labels)
-          correct += (predicted == labels).sum()
-
+            test = images.view(100, 1, 28, 28)
+            # Forward propagation
+            outputs = model(test)
+            outputsave.append(outputs)
+            labelssave.append(labels)
+            # Get predictions from the maximum value
+            _, predicted = torch.max(outputs.data, 1)
+            # Total number of labels
+            total += len(labels)
+            correct += (predicted == labels).sum()
 
 outputsave = torch.cat(outputsave, dim=0)
 labelssave = torch.cat(labelssave, dim=0)
-accuracy = 100 * correct.numpy() / float(total)
+
+accuracy = 100 * correct / float(total)
 print(f'accuracy on testing set: {accuracy}')
 # Save output and labels
 np.savez('../data/outputs_test.npz', outputsave.numpy(), labelssave.numpy())
