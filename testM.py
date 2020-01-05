@@ -4,6 +4,7 @@ import torchvision.transforms as transforms
 import pandas as pd 
 import numpy as np 
 import matplotlib.pyplot as plt 
+import rotateImg 
 
 npzfile = np.load('../data/test.npz')
 
@@ -45,6 +46,12 @@ predictions = torch.argmax(outputs.data, dim= 1)
 
 acc = (predictions == tarTh).sum() / float(predictions.shape[0])
 print ('The acc of test dataset is {}'.format(100 * acc))
+
+###########RoatingImage####################################
+digit = feaTh[4]
+# plt.imshow(digit.view((28, 28)))
+# plt.show()
+rotateImg.rotating_image_classification(digit, model)
 
 # u = numOfClass / torch.sum(alpha, dim = 1, keepdims = True)
 # pro = alpha / torch.sum (alpha, dim = 1, keepdims = True)

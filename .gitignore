@@ -1,3 +1,4 @@
 *.pyproj
 *.vscode/
 MNIST_data/
+__pycache__/
