@@ -1,7 +1,6 @@
 """
-The training function
-It generates a model and saves as a file
-This training is the one with a cross-entropy training error 
+It generates and trains a CNN model with loss function eq5
+Saving the state_dict as a file 
 """
 import torch
 import torch.nn as nn
@@ -30,36 +29,24 @@ features_train, features_test, targets_train, targets_test = train_test_split(fe
 featuresTrain = torch.from_numpy(features_train)
 targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
 
-# Create feature and targets tensor for test set.
-featuresTest = torch.from_numpy(features_test)
-targetsTest = torch.from_numpy(targets_test).type(torch.LongTensor) 
-
 # Utility parameters
-n_iters = 5000
 batch_size = 100
-num_epochs = int(n_iters / (len(features_train) / batch_size))
+epochs = 8
 numOfClass = 10
 # I am not sure about this paramter, it intilizised as 0,
 # but I adopt 100
 global_step = 100
-n_batches = len(features_train)  // batch_size
-annealing_step = 10 * n_batches
+annealing_step = 10 * (len(features_train) // batch_size)
 lmb = 0.005
 learning_rate = 0.1
-print(f'{num_epochs} epochs in training')
+print(f'{epochs} epochs in training')
 
 # Pytorch train and test sets
 train = torch.utils.data.TensorDataset(featuresTrain, targetsTrain)
-test = torch.utils.data.TensorDataset(featuresTest, targetsTest)
-
 # Data loader
 train_loader = torch.utils.data.DataLoader(train, 
                                                                      batch_size = batch_size, 
                                                                      shuffle = False)
-test_loader = torch.utils.data.DataLoader(test, 
-                                                                   batch_size = batch_size, 
-                                                                   shuffle = False)
-
 
 # KL Divergence calculator
 # Shape of Input:    alpha: r × numOfClass; numOfClass: 1 × 1
@@ -183,7 +170,7 @@ acc2d = []
 loss1d = []
 loss2d = []
 fig, axes = plt.subplots(nrows= 2, ncols= 1)
-for epoch in range(8):
+for epoch in range(epochs):
     acc1d.clear()
     loss1d.clear()
     print('Training-epoch: {}'.format(epoch + 1))
@@ -203,8 +190,8 @@ for epoch in range(8):
         outputs = model(train) 
         evidence = relu_evidence(outputs)
         alpha = evidence + 1
-        u = numOfClass / torch.sum(alpha, dim = 1, keepdims = True)
-        pro = alpha / torch.sum (alpha, dim = 1, keepdims = True)
+        # u = numOfClass / torch.sum(alpha, dim = 1, keepdims = True)
+        # pro = alpha / torch.sum (alpha, dim = 1, keepdims = True)
         acc = torch.sum(torch.argmax(outputs, dim= 1).view(-1, 1) ==
                 torch.argmax(newLabels, dim= 1).view(-1, 1)).item() / newLabels.shape[0]
         #print ('Acc:', acc)
@@ -223,8 +210,8 @@ for epoch in range(8):
         (loss + l2Loss).backward()
         # Update parameters
         optimizer.step()
-    axes[0].plot(acc1d)
-    axes[1].plot(loss1d)
+    axes[0].plot(acc1d, label= 'eph{}'.format(epoch + 1))
+    axes[1].plot(loss1d, label= 'eph{}'.format(epoch + 1))
     acc2d.append(acc1d)
     loss2d.append(loss1d)
 
@@ -241,5 +228,7 @@ np.savez('../data/test.npz', features_test, targets_test)
 print ('Finish Saving Files')
 axes[0].set_ylabel('AccVal')
 axes[1].set_ylabel('LossVal')
-axes[1].set_xlabel('Epoch')
+axes[1].set_xlabel('Iteration')
+axes[0].legend()
+axes[1].legend() 
 plt.show()
