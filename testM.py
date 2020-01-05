@@ -42,19 +42,24 @@ model = CNNModel()
 model.load_state_dict(torch.load('../data/model.pt'))
 
 outputs = model(feaTh.view(feaTh.shape[0], 1, 28, 28))
+outputs = outputs.detach()
 predictions = torch.argmax(outputs.data, dim= 1)
-
 acc = (predictions == tarTh).sum() / float(predictions.shape[0])
 print ('The acc of test dataset is {}'.format(100 * acc))
+
+###########Analise########################################
+# belief = outputs
+# evidence = belief * (belief > 0)
+# alpha = evidence + 1
+# probability = alpha / torch.sum (alpha, dim = 1, keepdims = True)
+# u = numClass / torch.sum(alpha, dim = 1, keepdims = True)
+
 
 ###########RoatingImage####################################
 digit = feaTh[4]
 # plt.imshow(digit.view((28, 28)))
 # plt.show()
 rotateImg.rotating_image_classification(digit, model)
-
-# u = numOfClass / torch.sum(alpha, dim = 1, keepdims = True)
-# pro = alpha / torch.sum (alpha, dim = 1, keepdims = True)
 
 
 

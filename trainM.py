@@ -30,8 +30,8 @@ featuresTrain = torch.from_numpy(features_train)
 targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
 
 # Utility parameters
+epochs = 9
 batch_size = 100
-epochs = 8
 numOfClass = 10
 # I am not sure about this paramter, it intilizised as 0,
 # but I adopt 100

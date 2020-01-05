@@ -12,16 +12,14 @@ import matplotlib.pyplot as plt
 # img: digit image (28, 28)
 def rotating_image_classification(img, model, 
     numClass= 10, dims=(28, 28), threshold= 0.25, 
-    c=['black','blue','brown','purple','cyan','red'], 
-    marker=['s','^','o'] * 2):
+    c=['black','blue','brown','purple','cyan','red'] * 2, 
+    marker=['s','^','o'] * 4):
 
     Mdeg = 180 
     Ndeg = Mdeg // 10 + 1
     ldeg = []
-    lp = []
+    lp = np.empty((1, numClass))
     lu = []
-    # scores = []
-    scores = torch.zeros((1, numClass))
     rot_imgs = np.zeros((dims[0], dims[1] * Ndeg))
 
     for i, deg in enumerate(np.linspace(0, Mdeg, Ndeg)):
@@ -30,39 +28,31 @@ def rotating_image_classification(img, model,
         rot_img = np.clip(a= rot_img, a_min= 0, a_max= 1)
         rot_imgs[:, i * dims[1]: (i+1) * dims[1]] = 1 - rot_img
         outputs = model(torch.from_numpy(rot_img).type(torch.float).view(1, 1, 28, 28))
-        p_pred_t = torch.argmax(outputs)
+        outputs = outputs.detach()
         evidence = outputs * (outputs > 0)
         alpha = evidence + 1
+        probability = alpha / torch.sum (alpha, dim = 1, keepdims = True)
 
         u = numClass / torch.sum(alpha, dim = 1, keepdims = True)
         lu.append(u)
+        probability[probability < threshold] = 0
+        lp = np.vstack((lp, probability.numpy()))
+        ldeg.append(deg)
 
-        # feed_dict={X: rot_img.reshape(1,-1), keep_prob: 1.0}
-        # if uncertainty is None:
-        #     p_pred_t = sess.run(prob, feed_dict= feed_dict)
-        # else:
-        #     p_pred_t,u = sess.run([prob,uncertainty], feed_dict=feed_dict)
-        #     lu.append(u.mean())
-
-        scores += p_pred_t >= threshold
-        # scores.append((p_pred_t >= threshold).item())
-        print (scores)
-
-        ldeg.append(deg) 
-        lp.append(p_pred_t.item())
-        
-    labels = np.arange(numClass)[scores[0].type(bool)]
-    lp = np.array(lp)[:, labels]
-    labels = labels.tolist()
-    
     plt.figure(figsize=[6,6])
-    for i in range(len(labels)):
-        plt.plot(ldeg, lp[:,i], marker= marker[i], c= c[i])
     
-    labels += ['uncertainty']
-    plt.plot(ldeg, lu, marker='<',c='red')
-        
-    plt.legend(labels)
+    lp = lp[1:, :]
+    
+    for i in range(numClass):
+        if lp[:, i].sum() != 0:
+            plt.plot(ldeg, lp[:, i], label= '{}'.format(i),
+                     marker= marker[i], c= c[i])
+
+    lu = np.array(lu)       
+    ldeg = np.array(ldeg)
+
+    plt.plot(ldeg, lu, marker='<',c='red', label= 'uncertainty')
+    plt.legend()
  
     plt.xlim([0, Mdeg])  
     plt.xlabel('Rotation Degree')
