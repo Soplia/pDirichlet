@@ -21,7 +21,7 @@ belief3 = (evidence / np.sum(alpha, axis= 1, keepdims = True))
 # # (8400, 10)
 # Sa = np.transpose(Sa)
 # belief4 = evidence / Sa
-belief = belief4
+belief = belief3
 ######################################
 
 
@@ -58,14 +58,14 @@ for th in threshold:
 
 fig, axe = plt.subplots()
 #axe.plot(threshold, resultbelieflief)
-axe.plot(threshold, resultbelief, color= 'r', marker= '>', label= 'belief')
+axe.plot(resultbelief, threshold,  color= 'r', marker= '>', label= 'belief')
 axe.set_xlabel('Values of threshold')
 axe.set_ylabel('Num of candinator for Belief')
 axe.legend(loc= 2)
 
 axe1 = axe.twinx()
 #axe1.plot(threshold, resultprobility)
-axe1.plot(threshold, resultprobility, color= 'k', marker= 'o', label= 'probility')
+axe1.plot(resultprobility, threshold,  color= 'k', marker= 'o', label= 'probility')
 axe1.set_ylabel('Num of candinator for Probility')
 axe1.legend(loc= 4)
 
