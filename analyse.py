@@ -98,7 +98,7 @@ SclBe = []
 SclPr = []
 SaccBe = []
 SaccPr = []
-for th in  np.linspace(0, 1, num=nb):
+for th in  np.linspace(0, 1, num= nb):
       maskBe = beliefsCS <= th
       maskPr = probasCS <= th
       classesBe = maskBe * (classes)
@@ -122,8 +122,8 @@ for th in  np.linspace(0, 1, num=nb):
       # print(f'accBe = {accBe}, mean classes = {meanClBe}')
       # print(f'accPr = {accPr}, mean classes = {meanClPr}')
 
-plt.plot(SclBe,SaccBe,label='Using Belief threshold')
-plt.plot(SclPr,SaccPr,label='Using Prob threshold')
+plt.plot(SclBe, SaccBe, label='Using Belief threshold', ls= '*')
+plt.plot(SclPr, SaccPr, label='Using Prob threshold', ls= 's')
 plt.legend()
 plt.title('Accuracy vs Mean nb of candidates')
 plt.show()

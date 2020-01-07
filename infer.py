@@ -45,7 +45,7 @@ npzfile = np.load('../data/test.npz')
 features_test = npzfile['arr_0']
 
 # Add some noise to the feature_test
-Amp = 0.2 #between 0 and 1
+Amp = 0.0 #between 0 and 1
 noise = np.random.randn(features_test.shape[0], features_test.shape[1])
 # pdb.set_trace()
 features_test = features_test + noise.astype(dtype = 'float32')
