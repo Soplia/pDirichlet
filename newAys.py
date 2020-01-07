@@ -58,15 +58,30 @@ for th in threshold:
 
 fig, axe = plt.subplots()
 #axe.plot(threshold, resultbelieflief)
+axe.plot(threshold, resultbelief,  color= 'r', marker= '>', label= 'belief')
+axe.set_xlabel('Acc threshold')
+axe.set_ylabel('Num of candinators for Belief')
+axe.legend(loc= 2)
+
+axe1 = axe.twinx()
+#axe1.plot(threshold, resultprobility)
+axe1.plot(threshold, resultprobility,  color= 'k', marker= 'o', label= 'probility')
+axe1.set_ylabel('Num of candinators for Probility')
+axe1.legend(loc= 4)
+
+plt.show()
+
+fig, axe = plt.subplots()
+#axe.plot(threshold, resultbelieflief)
 axe.plot(resultbelief, threshold,  color= 'r', marker= '>', label= 'belief')
-axe.set_xlabel('Values of threshold')
-axe.set_ylabel('Num of candinator for Belief')
+axe.set_xlabel('Num of candinators')
+axe.set_ylabel('Accuracy')
 axe.legend(loc= 2)
 
 axe1 = axe.twinx()
 #axe1.plot(threshold, resultprobility)
 axe1.plot(resultprobility, threshold,  color= 'k', marker= 'o', label= 'probility')
-axe1.set_ylabel('Num of candinator for Probility')
+axe1.set_ylabel('Accuracy')
 axe1.legend(loc= 4)
 
 plt.show()
