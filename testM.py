@@ -47,6 +47,7 @@ predictions = torch.argmax(outputs.data, dim= 1)
 acc = (predictions == tarTh).sum() / float(predictions.shape[0])
 print ('The acc of test dataset is {}'.format(100 * acc))
 
+np.savez('../data/testM.npz', outputs.numpy(), tarTh.numpy())
 ###########RoatingImage####################################
 # digit = feaTh[4]
 # # plt.imshow(digit.view((28, 28)))

@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt 
 
-npzfile = np.load('../data/outputs_test.npz')
+npzfile = np.load('../data/testM.npz')
 outputs = npzfile['arr_0']
 predictions = npzfile['arr_1']
 
@@ -14,14 +14,14 @@ alpha = evidence + 1
 ###### Chose the belief you like ####
 belief1 = beliefRaw
 belief2 = evidence
-Sa = np.sum(alpha,axis=1)
-Sa = np.expand_dims(Sa, axis=0)
-Sa = np.repeat(Sa, alpha.shape[1],axis = 0)
-# (8400, 10)
-Sa = np.transpose(Sa)
-belief3 = outputs / Sa
-
-belief = belief3
+belief3 = (evidence / np.sum(alpha, axis= 1, keepdims = True))
+# Sa = np.sum(alpha, axis=1)
+# Sa = np.expand_dims(Sa, axis=0)
+# Sa = np.repeat(Sa, alpha.shape[1], axis = 0)
+# # (8400, 10)
+# Sa = np.transpose(Sa)
+# belief4 = evidence / Sa
+belief = belief4
 ######################################
 
 
@@ -50,10 +50,10 @@ for th in threshold:
     thMatirx = np.full(alpha.shape, th)
     maskbelief = beliefCumsum >= thMatirx
     maskprobility = probilityCumsum >= thMatirx
-    # numCandinatorBelief = numClassMatirx - np.sum(maskbelieflief, axis= 1) + 1
-    # meanCandinatorBelief = np.mean(numCandinatorBelief)
-    # resultbelieflief.append(meanCandinatorBelief)
-    resultbelief.append(np.mean(numClassMatirx - np.sum(maskbelief, axis= 1) + 1))
+    numCandinatorBelief = numClassMatirx - np.sum(maskbelief, axis= 1) + 1
+    meanCandinatorBelief = np.mean(numCandinatorBelief)
+    resultbelief.append(meanCandinatorBelief)
+    #resultbelief.append(np.mean(numClassMatirx - np.sum(maskbelief, axis= 1) + 1))
     resultprobility.append(np.mean(numClassMatirx - np.sum(maskprobility, axis= 1) + 1))
 
 fig, axe = plt.subplots()
