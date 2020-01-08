@@ -166,13 +166,9 @@ optimizer = torch.optim.SGD(model.parameters(), lr= learning_rate)
 
 # CNNModel with softmax cross entropy loss function
 acc1d = []
-acc2d = []
 loss1d = []
-loss2d = []
 fig, axes = plt.subplots(nrows= 2, ncols= 1)
 for epoch in range(epochs):
-    acc1d.clear()
-    loss1d.clear()
     print('Training-epoch: {}'.format(epoch + 1))
     for i, (images, labels) in enumerate(train_loader):
         # Change the shape of labels from (images.shape[0]) to 
@@ -210,22 +206,21 @@ for epoch in range(epochs):
         (loss + l2Loss).backward()
         # Update parameters
         optimizer.step()
-    axes[0].plot(acc1d, label= 'eph{}'.format(epoch + 1))
-    axes[1].plot(loss1d, label= 'eph{}'.format(epoch + 1))
-    acc2d.append(acc1d)
-    loss2d.append(loss1d)
 
 print ('Finish Training')
 
 # save model
 torch.save(model.state_dict(), '../data/model.pt')
 # save accuracy and loss during training the model
-torch.save(acc2d, '../data/accTrain.pt')
-torch.save(loss2d, '../data/lossTrain.pt')
+torch.save(acc1d, '../data/accTrain.pt')
+torch.save(loss1d, '../data/lossTrain.pt')
 # save testing dataset
 np.savez('../data/test.npz', features_test, targets_test)
 
 print ('Finish Saving Files')
+
+axes[0].plot(acc1d, label= 'Accuracy')
+axes[1].plot(loss1d, label= 'Loss')
 axes[0].set_ylabel('AccVal')
 axes[1].set_ylabel('LossVal')
 axes[1].set_xlabel('Iteration')
