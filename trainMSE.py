@@ -117,7 +117,7 @@ for epoch in range(epochs):
         loss1d.append(loss)
         # Calculating gradients
         loss.backward()
-        # Update parameters
+        # Update parameters  
         optimizer.step()
 
 print ('Finish Training')
@@ -127,8 +127,6 @@ torch.save(model.state_dict(), '../data/modelMSE.pt')
 # save accuracy and loss during training the model
 torch.save(acc1d, '../data/accTrainMSE.pt')
 torch.save(loss1d, '../data/lossTrainMSE.pt')
-# save testing dataset
-np.savez('../data/test.npz', features_test, targets_test)
 
 print ('Finish Saving Files')
 axes[0].plot(acc1d, label= 'Accuracy')
