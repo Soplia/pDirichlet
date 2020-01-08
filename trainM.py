@@ -210,10 +210,10 @@ for epoch in range(epochs):
 print ('Finish Training')
 
 # save model
-torch.save(model.state_dict(), '../data/model.pt')
+torch.save(model.state_dict(), '../data/modelD.pt')
 # save accuracy and loss during training the model
-torch.save(acc1d, '../data/accTrain.pt')
-torch.save(loss1d, '../data/lossTrain.pt')
+torch.save(acc1d, '../data/accTrainD.pt')
+torch.save(loss1d, '../data/lossTrainD.pt')
 # save testing dataset
 np.savez('../data/test.npz', features_test, targets_test)
 

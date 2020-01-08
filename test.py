@@ -39,8 +39,8 @@ class CNNModel(nn.Module):
         return out4
 
 model = CNNModel()
-# # Load the parameter after DirichletDistribution
-# model.load_state_dict(torch.load('../data/model.pt'))
+## Load the parameter after DirichletDistribution
+#model.load_state_dict(torch.load('../data/modelD.pt'))
 # Load the parameter after MSE
 model.load_state_dict(torch.load('../data/modelMSE.pt'))
 
@@ -50,7 +50,7 @@ predictions = torch.argmax(outputs.data, dim= 1)
 acc = (predictions == tarTh).sum() / float(predictions.shape[0])
 print ('The acc of test dataset is {}'.format(100 * acc))
 
-# np.savez('../data/testM.npz', outputs.numpy(), tarTh.numpy())
+#np.savez('../data/testD.npz', outputs.numpy(), tarTh.numpy())
 np.savez('../data/testMSE.npz', outputs.numpy(), tarTh.numpy())
 
 ########### RoatingImage ####################################

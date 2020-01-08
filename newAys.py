@@ -4,9 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 # Load data from test dataset
-# npzfile = np.load('../data/testM.npz')
-# npzfile = np.load('../data/testMSE.npz')
-npzfile = np.load('../data/testNoise.npz')
+#npzfile = np.load('../data/testD.npz')
+#npzfile = np.load('../data/testMSE.npz')
+#npzfile = np.load('../data/testNoiseD.npz')
+npzfile = np.load('../data/testNoiseMSE.npz')
 outputs = npzfile['arr_0']
 predictions = npzfile['arr_1']
 
@@ -57,15 +58,21 @@ for th in threshold:
     #resultbelief.append(np.mean(numClassMatirx - np.sum(maskbelief, axis= 1) + 1))
     resultprobility.append(np.mean(numClassMatirx - np.sum(maskprobility, axis= 1) + 1))
 
+np.savez('../data/threshold.np', threshold)
+#np.savez('../data/aysD.np', np.array(resultbelief), np.array(resultprobility))
+#np.savez('../data/aysMSE.np', np.array(resultbelief), np.array(resultprobility))
+#np.savez('../data/aysNoiseD.np', np.array(resultbelief), np.array(resultprobility))
+np.savez('../data/aysNoiseMSE.np', np.array(resultbelief), np.array(resultprobility))
+
+print ('Finish saving files')
+
 fig, axe = plt.subplots()
-#axe.plot(threshold, resultbelieflief)
 axe.plot(threshold, resultbelief,  color= 'r', marker= '>', label= 'belief')
 axe.set_xlabel('Acc threshold')
 axe.set_ylabel('Num of candinators for Belief')
 axe.legend(loc= 2)
 
 axe1 = axe.twinx()
-#axe1.plot(threshold, resultprobility)
 axe1.plot(threshold, resultprobility,  color= 'k', marker= 'o', label= 'probility')
 axe1.set_ylabel('Num of candinators for Probility')
 axe1.legend(loc= 4)
@@ -73,14 +80,12 @@ axe1.legend(loc= 4)
 plt.show()
 
 fig, axe = plt.subplots()
-#axe.plot(threshold, resultbelieflief)
 axe.plot(resultbelief, threshold,  color= 'r', marker= '>', label= 'belief')
 axe.set_xlabel('Num of candinators')
 axe.set_ylabel('Accuracy')
 axe.legend(loc= 2)
 
 axe1 = axe.twinx()
-#axe1.plot(threshold, resultprobility)
 axe1.plot(resultprobility, threshold,  color= 'k', marker= 'o', label= 'probility')
 axe1.set_ylabel('Accuracy')
 axe1.legend(loc= 4)

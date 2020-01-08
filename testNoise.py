@@ -45,9 +45,9 @@ class CNNModel(nn.Module):
 
 model = CNNModel()
 # Load the parameter after DirichletDistribution
-model.load_state_dict(torch.load('../data/model.pt'))
-# # Load the parameter after MSE
-# model.load_state_dict(torch.load('../data/modelMSE.pt'))
+model.load_state_dict(torch.load('../data/modelD.pt'))
+## load the parameter after mse
+#model.load_state_dict(torch.load('../data/modelMSE.pt'))
 
 outputs = model(feaTh.view(feaTh.shape[0], 1, 28, 28))
 outputs = outputs.detach()
@@ -55,5 +55,7 @@ predictions = torch.argmax(outputs.data, dim= 1)
 acc = (predictions == tarTh).sum() / float(predictions.shape[0])
 print ('The acc of test dataset is {}'.format(100 * acc))
 
-# np.savez('../data/testM.npz', outputs.numpy(), tarTh.numpy())
-np.savez('../data/testNoise.npz', outputs.numpy(), tarTh.numpy())
+#np.savez('../data/testNoiseD.npz', outputs.numpy(), tarTh.numpy())
+#np.savez('../data/testNoiseMSE.npz', outputs.numpy(), tarTh.numpy())
+
+np.savez('../data/testNoise20.npz', outputs.numpy(), tarTh.numpy())
