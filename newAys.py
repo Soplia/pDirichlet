@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 
 # Load data from test dataset
 # npzfile = np.load('../data/testM.npz')
-npzfile = np.load('../data/testMSE.npz')
+# npzfile = np.load('../data/testMSE.npz')
+npzfile = np.load('../data/testNoise.npz')
 outputs = npzfile['arr_0']
 predictions = npzfile['arr_1']
 
