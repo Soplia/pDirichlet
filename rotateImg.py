@@ -15,6 +15,7 @@ def rotating_image_classification(img, model,
     c=['black','blue','brown','purple','cyan','red'] * 2, 
     marker=['s','^','o'] * 4):
 
+    outputsSave = np.zeros((1, 10))
     Mdeg = 180 
     Ndeg = Mdeg // 10 + 1
     ldeg = []
@@ -29,6 +30,9 @@ def rotating_image_classification(img, model,
         rot_imgs[:, i * dims[1]: (i+1) * dims[1]] = 1 - rot_img
         outputs = model(torch.from_numpy(rot_img).type(torch.float).view(1, 1, 28, 28))
         outputs = outputs.detach()
+
+        outputsSave = np.vstack((outputsSave, outputs))
+
         evidence = outputs * (outputs > 0)
         alpha = evidence + 1
         probability = alpha / torch.sum (alpha, dim = 1, keepdims = True)
@@ -38,6 +42,9 @@ def rotating_image_classification(img, model,
         probability[probability < threshold] = 0
         lp = np.vstack((lp, probability.numpy()))
         ldeg.append(deg)
+
+    outputsSave = outputsSave[1:, :]
+    np.savez('../data/roatedDigitOutput.npz', outputsSave)
 
     plt.figure(figsize=[6,6])
     

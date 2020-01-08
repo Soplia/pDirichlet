@@ -3,9 +3,15 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt 
 
+# Load data from test dataset
 npzfile = np.load('../data/testM.npz')
 outputs = npzfile['arr_0']
 predictions = npzfile['arr_1']
+
+# # Load data from roated digit
+# outputs = np.load('../data/roatedDigitOutput.npz')['arr_0']
+# label = np.load('../data/roatedDigitLabel.npz')['arr_0']
+# predictions = np.full((outputs.shape[0], 1), label)
 
 numClass = 10
 beliefRaw = outputs
@@ -15,15 +21,8 @@ alpha = evidence + 1
 belief1 = beliefRaw
 belief2 = evidence
 belief3 = (evidence / np.sum(alpha, axis= 1, keepdims = True))
-# Sa = np.sum(alpha, axis=1)
-# Sa = np.expand_dims(Sa, axis=0)
-# Sa = np.repeat(Sa, alpha.shape[1], axis = 0)
-# # (8400, 10)
-# Sa = np.transpose(Sa)
-# belief4 = evidence / Sa
 belief = belief3
 ######################################
-
 
 probility = (alpha / np.sum(alpha, axis= 1, keepdims = True))
 uncerty = (numClass / np.sum(alpha, axis= 1, keepdims = True))
