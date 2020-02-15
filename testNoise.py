@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import rotateImg 
 
-npzfile = np.load('../data/test.npz')
+npzfile = np.load('../data/testRaw.npz')
 
 feaTh = torch.from_numpy(npzfile['arr_0']).type(torch.float)
 tarTh = torch.from_numpy(npzfile['arr_1']).type(torch.int)
@@ -45,9 +45,9 @@ class CNNModel(nn.Module):
 
 model = CNNModel()
 # Load the parameter after DirichletDistribution
-model.load_state_dict(torch.load('../data/modelD.pt'))
+model.load_state_dict(torch.load('../criticalData/modelDiri.pt'))
 ## load the parameter after mse
-#model.load_state_dict(torch.load('../data/modelMSE.pt'))
+#model.load_state_dict(torch.load('../criticalData/modelCel.pt'))
 
 outputs = model(feaTh.view(feaTh.shape[0], 1, 28, 28))
 outputs = outputs.detach()
@@ -55,7 +55,7 @@ predictions = torch.argmax(outputs.data, dim= 1)
 acc = (predictions == tarTh).sum() / float(predictions.shape[0])
 print ('The acc of test dataset is {}'.format(100 * acc))
 
-#np.savez('../data/testNoiseD.npz', outputs.numpy(), tarTh.numpy())
-#np.savez('../data/testNoiseMSE.npz', outputs.numpy(), tarTh.numpy())
+#np.savez('../data/testNoiseDiri.npz', outputs.numpy(), tarTh.numpy())
+#np.savez('../data/testNoiseCel.npz', outputs.numpy(), tarTh.numpy())
 
 np.savez('../data/testNoise20.npz', outputs.numpy(), tarTh.numpy())

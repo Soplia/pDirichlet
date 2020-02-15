@@ -1,7 +1,3 @@
-"""
-It generates and trains a CNN model with loss function eq5
-Saving the state_dict as a file 
-"""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -10,7 +6,6 @@ import pandas as pd
 import numpy as np 
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt 
-# import pdb
 
 train = pd.read_csv("../data/train.csv", dtype = np.float32)
 
@@ -18,13 +13,11 @@ train = pd.read_csv("../data/train.csv", dtype = np.float32)
 targets_numpy = train.label.values
 # Normalization
 features_numpy = train.loc[:, train.columns != "label"].values / 255
-
 # Train test split.  Size of train data is 90% and size of test data is 10%.
 features_train, features_test, targets_train, targets_test = train_test_split(features_numpy,
                                                                                                                     targets_numpy,
                                                                                                                     test_size = 0.2,
                                                                                                                     random_state = 42) 
-# pdb.set_trace()
 # Create feature and targets tensor for train set.
 featuresTrain = torch.from_numpy(features_train)
 targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
@@ -46,12 +39,6 @@ train_loader = torch.utils.data.DataLoader(train,
 # Three types evidence
 def relu_evidence(logits):
     return F.relu(logits)
-
-def exp_evidence(logits): 
-    return torch.exp(logits / 1000)
-
-def softmax_evidence(logits):
-    return F.softmax(logits)
 
 # Define a class CNNmodelSf with the classical softmax
 class CNNModel(nn.Module):
@@ -76,11 +63,10 @@ class CNNModel(nn.Module):
         out4 = self.fc2(out3)
         return out4
 
-# Create ANN
 model = CNNModel()
 # SGD Optimizer
 optimizer = torch.optim.SGD(model.parameters(), lr= learning_rate)
-error = torch.nn.MSELoss()
+error = nn.CrossEntropyLoss();
 
 # CNNModel with softmax cross entropy loss function
 acc1d = []
@@ -89,31 +75,18 @@ fig, axes = plt.subplots(nrows= 2, ncols= 1)
 for epoch in range(epochs):
     print('Training-epoch: {}'.format(epoch + 1))
     for i, (images, labels) in enumerate(train_loader):
-        # Change the shape of labels from (images.shape[0]) to 
-        # (images.shape[0], 10)
-        newLabels = torch.zeros((labels.shape[0], 10), dtype= torch.float32)
-        cnt = 0
-        for pos in labels:
-            newLabels[cnt, pos] = 1.0
-            cnt += 1
-
         train = images.view(100, 1, 28, 28)
         # Clear gradients
         optimizer.zero_grad()
         # Forward propagation
         outputs = model(train) 
-        evidence = relu_evidence(outputs)
-        alpha = evidence + 1
-        # u = numOfClass / torch.sum(alpha, dim = 1, keepdims = True)
-        # pro = alpha / torch.sum (alpha, dim = 1, keepdims = True)
+
         acc = torch.sum(torch.argmax(outputs, dim= 1).view(-1, 1) ==
                 torch.argmax(newLabels, dim= 1).view(-1, 1)).item() / newLabels.shape[0]
-        #print ('Acc:', acc)
         acc1d.append(acc)
 
-        #Calculate softmax and ross entropy loss
-        loss = error(outputs, newLabels)
-        
+        #Calculate softmax and cross entropy loss
+        loss = error(outputs, labels)
         loss1d.append(loss)
         # Calculating gradients
         loss.backward()
@@ -123,10 +96,10 @@ for epoch in range(epochs):
 print ('Finish Training')
 
 # save model
-torch.save(model.state_dict(), '../data/modelMSE.pt')
+torch.save(model.state_dict(), '../criticalData/modelCel.pt')
 # save accuracy and loss during training the model
-torch.save(acc1d, '../data/accTrainMSE.pt')
-torch.save(loss1d, '../data/lossTrainMSE.pt')
+torch.save(acc1d, '../criticalData/accTrainCel.pt')
+torch.save(loss1d, '../criticalData/lossTrainCel.pt')
 
 print ('Finish Saving Files')
 axes[0].plot(acc1d, label= 'Accuracy')

@@ -4,10 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 # Load data from test dataset
-#npzfile = np.load('../data/testD.npz')
-#npzfile = np.load('../data/testMSE.npz')
-#npzfile = np.load('../data/testNoiseD.npz')
-npzfile = np.load('../data/testNoiseMSE.npz')
+npzfile = np.load('../data/testDiri.npz')
+#npzfile = np.load('../data/testCel.npz')
+#npzfile = np.load('../data/testNoise20.npz')
 outputs = npzfile['arr_0']
 predictions = npzfile['arr_1']
 
@@ -58,13 +57,10 @@ for th in threshold:
     #resultbelief.append(np.mean(numClassMatirx - np.sum(maskbelief, axis= 1) + 1))
     resultprobility.append(np.mean(numClassMatirx - np.sum(maskprobility, axis= 1) + 1))
 
-np.savez('../data/threshold.np', threshold)
-#np.savez('../data/aysD.np', np.array(resultbelief), np.array(resultprobility))
-#np.savez('../data/aysMSE.np', np.array(resultbelief), np.array(resultprobility))
-#np.savez('../data/aysNoiseD.np', np.array(resultbelief), np.array(resultprobility))
-np.savez('../data/aysNoiseMSE.np', np.array(resultbelief), np.array(resultprobility))
-
-print ('Finish saving files')
+#np.savez('../data/threshold.np', threshold)
+#np.savez('../data/aysDiri.np', np.array(resultbelief), np.array(resultprobility))
+#np.savez('../data/aysCel.np', np.array(resultbelief), np.array(resultprobility))
+#np.savez('../data/aysNoise20.np', np.array(resultbelief), np.array(resultprobility))
 
 fig, axe = plt.subplots()
 axe.plot(threshold, resultbelief,  color= 'r', marker= '>', label= 'belief')

@@ -10,7 +10,6 @@ import pandas as pd
 import numpy as np 
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt 
-# import pdb
 
 train = pd.read_csv("../data/train.csv", dtype = np.float32)
 
@@ -18,13 +17,11 @@ train = pd.read_csv("../data/train.csv", dtype = np.float32)
 targets_numpy = train.label.values
 # Normalization
 features_numpy = train.loc[:, train.columns != "label"].values / 255
-
 # Train test split.  Size of train data is 90% and size of test data is 10%.
 features_train, features_test, targets_train, targets_test = train_test_split(features_numpy,
                                                                                                                     targets_numpy,
                                                                                                                     test_size = 0.2,
                                                                                                                     random_state = 42) 
-# pdb.set_trace()
 # Create feature and targets tensor for train set.
 featuresTrain = torch.from_numpy(features_train)
 targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
@@ -33,8 +30,7 @@ targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor)
 epochs = 9
 batch_size = 100
 numOfClass = 10
-# I am not sure about this paramter, it intilizised as 0,
-# but I adopt 100
+# I am not sure about global_step, I adopt 100
 global_step = 100
 annealing_step = 10 * (len(features_train) // batch_size)
 lmb = 0.005
@@ -210,12 +206,12 @@ for epoch in range(epochs):
 print ('Finish Training')
 
 # save model
-torch.save(model.state_dict(), '../data/modelD.pt')
+torch.save(model.state_dict(), '../criticalData/modelDiri.pt')
 # save accuracy and loss during training the model
-torch.save(acc1d, '../data/accTrainD.pt')
-torch.save(loss1d, '../data/lossTrainD.pt')
+torch.save(acc1d, '../criticalData/accTrainDiri.pt')
+torch.save(loss1d, '../criticalData/lossTrainDiri.pt')
 # save testing dataset
-np.savez('../data/test.npz', features_test, targets_test)
+np.savez('../data/testRaw.npz', features_test, targets_test)
 
 print ('Finish Saving Files')
 

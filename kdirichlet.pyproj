@@ -4,13 +4,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f0b05eb7-c2cd-4e5a-880b-33c6a64be9a9</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>kdirichlet.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <StartupFile>newAys.py</StartupFile>
+    <SearchPath>outils</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>kdirichlet</Name>
     <RootNamespace>kdirichlet</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
+    <InterpreterId>Global|VisualStudio|pdirichlet</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +22,18 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="kdirichlet.py" />
+    <Compile Include="newAys.py" />
+    <Compile Include="rotateImg.py" />
+    <Compile Include="testDCR.py" />
+    <Compile Include="testNoise.py" />
+    <Compile Include="trainCel.py" />
+    <Compile Include="trainDiri.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|VisualStudio|pdirichlet" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="outils\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
