@@ -158,7 +158,6 @@ class CNNModel(nn.Module):
 model = CNNModel()
 # SGD Optimizer
 optimizer = torch.optim.SGD(model.parameters(), lr= learning_rate)
-# error = torch.nn.MSELoss()
 
 # CNNModel with softmax cross entropy loss function
 acc1d = []
@@ -186,21 +185,17 @@ for epoch in range(epochs):
         # pro = alpha / torch.sum (alpha, dim = 1, keepdims = True)
         acc = torch.sum(torch.argmax(outputs, dim= 1).view(-1, 1) ==
                 torch.argmax(newLabels, dim= 1).view(-1, 1)).item() / newLabels.shape[0]
-        #print ('Acc:', acc)
         acc1d.append(acc)
-
-        #Calculate softmax and ross entropy loss
-        #loss = error(outputs, newLabels)
         
         # Should not input pro, must be the real label
         loss = torch.mean(loss_eq5(newLabels, alpha, numOfClass, global_step, annealing_step))
         l2Loss = (L2Loss(model.state_dict()['fc1.weight']) + 
                          L2Loss(model.state_dict()['fc2.weight'])) * lmb 
-        
         loss1d.append(loss + l2Loss)
-        # Calculating gradients
+        #loss1d.append(loss)
+
         (loss + l2Loss).backward()
-        # Update parameters
+        #(loss).backward()
         optimizer.step()
 
 print ('Finish Training')

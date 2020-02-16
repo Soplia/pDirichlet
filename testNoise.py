@@ -49,6 +49,8 @@ model.load_state_dict(torch.load('../criticalData/modelDiri.pt'))
 ## load the parameter after mse
 #model.load_state_dict(torch.load('../criticalData/modelCel.pt'))
 
+model.eval()
+
 outputs = model(feaTh.view(feaTh.shape[0], 1, 28, 28))
 outputs = outputs.detach()
 predictions = torch.argmax(outputs.data, dim= 1)

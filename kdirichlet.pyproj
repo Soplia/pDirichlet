@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f0b05eb7-c2cd-4e5a-880b-33c6a64be9a9</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>newAys.py</StartupFile>
+    <StartupFile>AysSubset.py</StartupFile>
     <SearchPath>outils</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -22,12 +22,19 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="newAys.py" />
+    <Compile Include="AysBP.py" />
+    <Compile Include="AysSubset.py" />
+    <Compile Include="printSubset.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="rotateImg.py" />
     <Compile Include="testDCR.py" />
     <Compile Include="testNoise.py" />
     <Compile Include="trainCel.py" />
     <Compile Include="trainDiri.py" />
+    <Compile Include="virus.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|VisualStudio|pdirichlet" />
