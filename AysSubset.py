@@ -4,15 +4,17 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 # Load data from test dataset
-npzfile = np.load('../data/testDiri.npz')
+#npzfile = np.load('../data/testDiri.npz')
 #npzfile = np.load('../data/testCel.npz')
-#npzfile = np.load('../data/testNoise20.npz')
-outputs = npzfile['arr_0']
-labels = npzfile['arr_1']
+
+#outputs = npzfile['arr_0']
+#labels = npzfile['arr_1']
+
 # # Load data from roated digit
-# outputs = np.load('../data/roatedDigitOutput.npz')['arr_0']
-# label = np.load('../data/roatedDigitLabel.npz')['arr_0']
-# predictions = np.full((outputs.shape[0], 1), label)
+outputs = np.load('../data/roatedDigitOutput.npz')['arr_0']
+label = np.load('../data/roatedDigitLabel.npz')['arr_0'].item()
+labels = np.zeros((outputs.shape[0], 1))
+labels.fill(label)
 
 numClass = 10
 beliefRaw = outputs
@@ -71,9 +73,9 @@ for th in thsd_uncertain:
     
     acc.append(cnt / ibsSorted.shape[0])
 
-np.savez('../data/thsd_uncertain', thsd_uncertain)
-np.savez('../data/aysDiri', np.array(resultbelief), np.array(acc))
-#np.savez('../data/aysCel.np', np.array(resultbelief), np.array(resultprobility))
-#np.savez('../data/aysNoise20.np', np.array(resultbelief), np.array(resultprobility))
+#np.savez('../criticalData/thsd_uncertain', thsd_uncertain)
+#np.savez('../criticalData/aysDiri', np.array(resultbelief), np.array(acc))
+#np.savez('../criticalData/aysCel', np.array(resultbelief), np.array(acc))
+np.savez('../criticalData/aysRoatedNum', np.array(resultbelief), np.array(acc))
 print ("Finish saving files!!")
 
