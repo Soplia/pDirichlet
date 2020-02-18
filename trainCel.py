@@ -23,7 +23,7 @@ featuresTrain = torch.from_numpy(features_train)
 targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
 
 # Utility parameters
-epochs = 9
+epochs = 50
 batch_size = 100
 numOfClass = 10
 learning_rate = 0.1
@@ -36,9 +36,8 @@ train_loader = torch.utils.data.DataLoader(train,
                                                                      batch_size = batch_size, 
                                                                      shuffle = False)
 
-# Three types evidence
-def relu_evidence(logits):
-    return F.relu(logits)
+def softmax_evidence(logits):
+    return F.softmax(logits)
 
 # Define a class CNNmodelSf with the classical softmax
 class CNNModel(nn.Module):
@@ -55,12 +54,14 @@ class CNNModel(nn.Module):
         self.relu = nn.ReLU()
         self.maxPool = nn.MaxPool2d(kernel_size= 2)
         self.dropout = nn.Dropout(.5)
+        #all rows add up to 1
+        self.softmax = nn.Softmax(dim= 1)
 
     def forward(self, input):
         out1 = self.maxPool(self.relu(self.conv1(input)))
         out2 = self.maxPool(self.relu(self.conv2(out1)))
         out3 = self.dropout(self.relu(self.fc1(out2.view(out2.size(0), -1))))
-        out4 = self.fc2(out3)
+        out4 = self.softmax(self.fc2(out3))
         return out4
 
 model = CNNModel()
@@ -81,8 +82,10 @@ for epoch in range(epochs):
         # Forward propagation
         outputs = model(train) 
 
-        acc = torch.sum(torch.argmax(outputs, dim= 1).view(-1, 1) ==
-                torch.argmax(newLabels, dim= 1).view(-1, 1)).item() / newLabels.shape[0]
+        #acc = torch.sum(torch.argmax(outputs, dim= 1).view(-1, 1) ==
+        #        torch.argmax(labels, dim= 1).view(-1, 1)).item() / labels.shape[0]
+        acc = torch.sum(torch.argmax(outputs, dim= 1) ==
+                labels).item() / float(labels.shape[0])
         acc1d.append(acc)
 
         #Calculate softmax and cross entropy loss

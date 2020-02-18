@@ -7,15 +7,8 @@ import matplotlib.pyplot as plt
 import rotateImg 
 
 npzfile = np.load('../data/testRaw.npz')
-
 feaTh = torch.from_numpy(npzfile['arr_0']).type(torch.float)
-tarTh = torch.from_numpy(npzfile['arr_1']).type(torch.int)
 
-# batchSize = 100
-# testDs = torch.utils.data.Dataset(feaTh, tarNp)
-# testLd = torch.utils.data.DataLoader(testDs, batch_size= batchSize)
-
-# Define a class CNNmodelSf with the classical softmax
 class CNNModel(nn.Module):
     def __init__(self):
         super(CNNModel, self).__init__()
@@ -41,26 +34,11 @@ class CNNModel(nn.Module):
 model = CNNModel()
 ## Load the parameter after DirichletDistribution
 model.load_state_dict(torch.load('../criticalData/modelDiri.pt'))
-# Load the parameter after CEL
 #model.load_state_dict(torch.load('../criticalData/modelCel.pt'))
+digit = feaTh[4]
+ # plt.imshow(digit.view((28, 28)))
+ # plt.show()
 
-model.eval()
-outputs = model(feaTh.view(feaTh.shape[0], 1, 28, 28))
-outputs = outputs.detach()
-predictions = torch.argmax(outputs.data, dim= 1)
-acc = (predictions == tarTh).sum() / float(predictions.shape[0])
-print ('The acc of test dataset is {}'.format(100 * acc))
-
-np.savez('../data/testDiri.npz', outputs.numpy(), tarTh.numpy())
-#np.savez('../data/testCel.npz', outputs.numpy(), tarTh.numpy())
-
-########### RoatingImage ####################################
-#digit = feaTh[4]
-# # plt.imshow(digit.view((28, 28)))
-# # plt.show()
-#rotateImg.rotating_image_classification(digit, model)
+rotateImg.rotating_image_classification(digit, model)
 #np.savez('../data/roatedDigitLabel.npz', tarTh[4])
 #print ('Finish saving file!!!')
-
-
-

@@ -5,16 +5,16 @@ import matplotlib.pyplot as plt
 
 # Load data from test dataset
 #npzfile = np.load('../data/testDiri.npz')
-#npzfile = np.load('../data/testCel.npz')
+npzfile = np.load('../data/testCel.npz')
 
-#outputs = npzfile['arr_0']
-#labels = npzfile['arr_1']
+outputs = npzfile['arr_0']
+labels = npzfile['arr_1']
 
 # # Load data from roated digit
-outputs = np.load('../data/roatedDigitOutput.npz')['arr_0']
-label = np.load('../data/roatedDigitLabel.npz')['arr_0'].item()
-labels = np.zeros((outputs.shape[0], 1))
-labels.fill(label)
+#outputs = np.load('../data/roatedDigitOutput.npz')['arr_0']
+#label = np.load('../data/roatedDigitLabel.npz')['arr_0'].item()
+#labels = np.zeros((outputs.shape[0], 1))
+#labels.fill(label)
 
 numClass = 10
 beliefRaw = outputs

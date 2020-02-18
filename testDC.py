@@ -11,14 +11,9 @@ npzfile = np.load('../data/testRaw.npz')
 feaTh = torch.from_numpy(npzfile['arr_0']).type(torch.float)
 tarTh = torch.from_numpy(npzfile['arr_1']).type(torch.int)
 
-# Add some noise to the feature_test
-Amp = 0.2 #between 0 and 1
-feaShape = feaTh.numpy().shape
-noise = np.zeros(feaShape)
-np.put(noise, 
-            np.random.choice(range(feaShape[0] * feaShape[1]), int(Amp * feaShape[0] * feaShape[1]), replace= False), 
-            np.random.randn(int(Amp * feaShape[0] * feaShape[1])))
-feaTh.add_(torch.from_numpy(noise))
+# batchSize = 100
+# testDs = torch.utils.data.Dataset(feaTh, tarNp)
+# testLd = torch.utils.data.DataLoader(testDs, batch_size= batchSize)
 
 # Define a class CNNmodelSf with the classical softmax
 class CNNModel(nn.Module):
@@ -44,20 +39,22 @@ class CNNModel(nn.Module):
         return out4
 
 model = CNNModel()
-# Load the parameter after DirichletDistribution
-model.load_state_dict(torch.load('../criticalData/modelDiri.pt'))
-## load the parameter after mse
-#model.load_state_dict(torch.load('../criticalData/modelCel.pt'))
+## Load the parameter after DirichletDistribution
+#model.load_state_dict(torch.load('../criticalData/modelDiri.pt'))
+# Load the parameter after CEL
+model.load_state_dict(torch.load('../criticalData/modelCel.pt'))
 
 model.eval()
-
 outputs = model(feaTh.view(feaTh.shape[0], 1, 28, 28))
 outputs = outputs.detach()
 predictions = torch.argmax(outputs.data, dim= 1)
 acc = (predictions == tarTh).sum() / float(predictions.shape[0])
 print ('The acc of test dataset is {}'.format(100 * acc))
 
-#np.savez('../data/testNoiseDiri.npz', outputs.numpy(), tarTh.numpy())
-#np.savez('../data/testNoiseCel.npz', outputs.numpy(), tarTh.numpy())
+#np.savez('../data/testDiri.npz', outputs.numpy(), tarTh.numpy())
+np.savez('../data/testCel.npz', outputs.numpy(), tarTh.numpy())
 
-np.savez('../data/testNoise20.npz', outputs.numpy(), tarTh.numpy())
+
+
+
+

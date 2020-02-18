@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 def rotating_image_classification(img, model, 
     numClass= 10, dims=(28, 28), threshold= 0.25, 
     c=['black','blue','brown','purple','cyan','red'] * 2, 
-    marker=['s','^','o'] * 4):
+    marker=['s','^','o', '>'] * 4):
 
     outputsSave = np.zeros((1, 10))
     Mdeg = 180 
@@ -66,7 +66,7 @@ def rotating_image_classification(img, model,
     plt.ylabel('Classification Probability')
     plt.show()
 
-    plt.figure(figsize=[6.4, 100])
-    plt.imshow(rot_imgs,cmap='gray')
-    plt.axis('off')
-    plt.show()
+    #plt.figure(figsize=[6.4, 100])
+    #plt.imshow(rot_imgs,cmap='gray')
+    #plt.axis('off')
+    #plt.show()
