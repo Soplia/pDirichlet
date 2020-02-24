@@ -11,9 +11,16 @@ npzfile = np.load('../data/testRaw.npz')
 feaTh = torch.from_numpy(npzfile['arr_0']).type(torch.float)
 tarTh = torch.from_numpy(npzfile['arr_1']).type(torch.int)
 
-# batchSize = 100
-# testDs = torch.utils.data.Dataset(feaTh, tarNp)
-# testLd = torch.utils.data.DataLoader(testDs, batch_size= batchSize)
+# Add some noise to the feature_test
+Amp = 0.2 #between 0 and 1
+modelType = 'Diri' # Diri, Cel
+
+feaShape = feaTh.numpy().shape
+noise = np.zeros(feaShape)
+np.put(noise, 
+            np.random.choice(range(feaShape[0] * feaShape[1]), int(Amp * feaShape[0] * feaShape[1]), replace= False), 
+            np.random.randn(int(Amp * feaShape[0] * feaShape[1])))
+feaTh.add_(torch.from_numpy(noise))
 
 # Define a class CNNmodelSf with the classical softmax
 class CNNModel(nn.Module):
@@ -39,8 +46,6 @@ class CNNModel(nn.Module):
         return out4
 
 model = CNNModel()
-modelType = 'Cel' # Diri, Cel
-
 model.load_state_dict(torch.load('../criticalData/model{}.pt'.format(modelType)))
 
 model.eval()
@@ -50,9 +55,6 @@ predictions = torch.argmax(outputs.data, dim= 1)
 acc = (predictions == tarTh).sum() / float(predictions.shape[0])
 print ('The acc of test dataset is {}'.format(100 * acc))
 
-np.savez('../data/test{}.npz'.format(modelType), outputs.numpy(), tarTh.numpy())
-
-
-
-
-
+#np.savez('../data/testDiri.npz', outputs.numpy(), tarTh.numpy())
+np.savez('../data/test{0}Noise{1}.npz'.format(modelType, (int)(Amp * 100)), outputs.numpy(), tarTh.numpy())
+print ('File saved!!!')

@@ -10,7 +10,7 @@ npzfile = np.load('../data/testRaw.npz')
 feaTh = torch.from_numpy(npzfile['arr_0']).type(torch.float)
 
 class CNNModel(nn.Module):
-    def __init__(self):
+    def __init__(self): 
         super(CNNModel, self).__init__()
         self.conv1 = nn.Conv2d(in_channels= 1, out_channels= 20, stride= 1, 
                                                 kernel_size= 5, padding= 0)
@@ -32,9 +32,9 @@ class CNNModel(nn.Module):
         return out4
 
 model = CNNModel()
-## Load the parameter after DirichletDistribution
-model.load_state_dict(torch.load('../criticalData/modelDiri.pt'))
-#model.load_state_dict(torch.load('../criticalData/modelCel.pt'))
+modelType = 'Cel' # Diri, Cel
+
+model.load_state_dict(torch.load('../criticalData/model{}.pt'.format(modelType)))
 digit = feaTh[4]
  # plt.imshow(digit.view((28, 28)))
  # plt.show()

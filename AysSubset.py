@@ -3,9 +3,10 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt 
 
-# Load data from test dataset
-#npzfile = np.load('../data/testDiri.npz')
-npzfile = np.load('../data/testCel.npz')
+# Cel, CelNoise20, CelNoise40, CelNoise60
+# Diri, DiriNoise20, DiriNoise40, DiriNoise60 
+modelType = 'DiriNoise60' 
+npzfile = np.load('../data/test{}.npz'.format(modelType))
 
 outputs = npzfile['arr_0']
 labels = npzfile['arr_1']
@@ -74,8 +75,8 @@ for th in thsd_uncertain:
     acc.append(cnt / ibsSorted.shape[0])
 
 #np.savez('../criticalData/thsd_uncertain', thsd_uncertain)
-#np.savez('../criticalData/aysDiri', np.array(resultbelief), np.array(acc))
-#np.savez('../criticalData/aysCel', np.array(resultbelief), np.array(acc))
-np.savez('../criticalData/aysRoatedNum', np.array(resultbelief), np.array(acc))
+np.savez('../data/ays{}'.format(modelType), np.array(resultbelief), np.array(acc))
+#np.savez('../data/aysRoatedNum', np.array(resultbelief), np.array(acc))
+
 print ("Finish saving files!!")
 

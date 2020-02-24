@@ -3,8 +3,11 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt 
 
-npzfile = np.load('../criticalData/aysCel.npz')
-#npzfile = np.load('../criticalData/aysDiri.npz')
+# Cel, CelNoise20, CelNoise40, CelNoise60
+# Diri, DiriNoise20, DiriNoise40, DiriNoise60 
+modelType = 'CelNoise60' 
+
+npzfile = np.load('../data/ays{}.npz'.format(modelType))
 #npzfile = np.load('../criticalData/aysRoatedNum.npz')
 belief = npzfile['arr_0']
 acc = npzfile['arr_1']
