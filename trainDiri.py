@@ -27,7 +27,7 @@ featuresTrain = torch.from_numpy(features_train)
 targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
 
 # Utility parameters
-epochs = 50
+epochs = 9
 batch_size = 100
 numOfClass = 10
 # I am not sure about global_step, I adopt 100
@@ -201,10 +201,10 @@ for epoch in range(epochs):
 print ('Finish Training')
 
 # save model
-torch.save(model.state_dict(), '../criticalData/modelDiri.pt')
+torch.save(model.state_dict(), '../criticalData/modelDiri{}.pt'.format(epochs))
 # save accuracy and loss during training the model
-torch.save(acc1d, '../criticalData/accTrainDiri.pt')
-torch.save(loss1d, '../criticalData/lossTrainDiri.pt')
+torch.save(acc1d, '../criticalData/accTrainDiri{}.pt'.format(epochs))
+torch.save(loss1d, '../criticalData/lossTrainDiri{}.pt'.format(epochs))
 # save testing dataset
 np.savez('../data/testRaw.npz', features_test, targets_test)
 
