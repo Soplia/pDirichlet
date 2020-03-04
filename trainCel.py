@@ -7,20 +7,24 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
-train = pd.read_csv("../data/train.csv", dtype = np.float32)
+import input_data
 
-# Split data into features(pixels) and labels(numbers from 0 to 9)
-targets_numpy = train.label.values
-# Normalization
-features_numpy = train.loc[:, train.columns != "label"].values / 255
-# Train test split.  Size of train data is 90% and size of test data is 10%.
+mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+
+#train = pd.read_csv("../data/train.csv", dtype = np.float32)
+#targets_numpy = train.label.values
+#features_numpy = train.loc[:, train.columns != "label"].values / 255
+
+targets_numpy = np.argmax(mnist.train.labels, axis= 1)
+features_numpy = mnist.train.images 
+
 features_train, features_test, targets_train, targets_test = train_test_split(features_numpy,
                                                                                                                     targets_numpy,
                                                                                                                     test_size = 0.2,
                                                                                                                     random_state = 42) 
 # Create feature and targets tensor for train set.
-featuresTrain = torch.from_numpy(features_train)
-targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
+featuresTrain = torch.from_numpy(features_numpy)
+targetsTrain = torch.from_numpy(targets_numpy).type(torch.LongTensor) 
 
 # Utility parameters
 epochs = 9
@@ -99,10 +103,10 @@ for epoch in range(epochs):
 print ('Finish Training')
 
 # save model
-torch.save(model.state_dict(), '../criticalData/modelCel.pt')
+torch.save(model.state_dict(), '../criticalData/modelCel{}.pt'.format(epochs))
 # save accuracy and loss during training the model
-torch.save(acc1d, '../criticalData/accTrainCel.pt')
-torch.save(loss1d, '../criticalData/lossTrainCel.pt')
+#torch.save(acc1d, '../criticalData/accTrainCel.pt')
+#torch.save(loss1d, '../criticalData/lossTrainCel.pt')
 
 print ('Finish Saving Files')
 axes[0].plot(acc1d, label= 'Accuracy')

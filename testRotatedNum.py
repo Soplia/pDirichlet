@@ -35,7 +35,7 @@ class CNNModel(nn.Module):
         return out4
 
 model = CNNModel()
-modelType = 'Diri9' # Diri, Cel, Diri9, Cel9, Diri20
+modelType = 'Cel9' # Diri, Cel, Diri9, Cel9, Diri20
 
 model.load_state_dict(torch.load('../criticalData/model{}.pt'.format(modelType)))
 ##digit = feaTh[0]
