@@ -10,28 +10,30 @@ import pandas as pd
 import numpy as np 
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt 
+import input_data
 
-train = pd.read_csv("../data/train.csv", dtype = np.float32)
+mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 
-# Split data into features(pixels) and labels(numbers from 0 to 9)
-targets_numpy = train.label.values
-# Normalization
-features_numpy = train.loc[:, train.columns != "label"].values / 255
-# Train test split.  Size of train data is 90% and size of test data is 10%.
+#train = pd.read_csv("../data/train.csv", dtype = np.float32)
+#targets_numpy = train.label.values
+#features_numpy = train.loc[:, train.columns != "label"].values / 255
+
+targets_numpy = np.argmax(mnist.train.labels, axis= 1)
+features_numpy = mnist.train.images 
+
 features_train, features_test, targets_train, targets_test = train_test_split(features_numpy,
                                                                                                                     targets_numpy,
                                                                                                                     test_size = 0.2,
                                                                                                                     random_state = 42) 
 # Create feature and targets tensor for train set.
-featuresTrain = torch.from_numpy(features_train)
-targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
+featuresTrain = torch.from_numpy(features_numpy)
+targetsTrain = torch.from_numpy(targets_numpy).type(torch.LongTensor) 
 
 # Utility parameters
 epochs = 9
 batch_size = 100
 numOfClass = 10
-# I am not sure about global_step, I adopt 100
-global_step = 100
+
 annealing_step = 10 * (len(features_train) // batch_size)
 lmb = 0.005
 learning_rate = 0.1
@@ -163,7 +165,9 @@ optimizer = torch.optim.SGD(model.parameters(), lr= learning_rate)
 acc1d = []
 loss1d = []
 fig, axes = plt.subplots(nrows= 2, ncols= 1)
+
 for epoch in range(epochs):
+    global_step = 100
     print('Training-epoch: {}'.format(epoch + 1))
     for i, (images, labels) in enumerate(train_loader):
         # Change the shape of labels from (images.shape[0]) to 
@@ -174,7 +178,7 @@ for epoch in range(epochs):
             newLabels[cnt, pos] = 1.0
             cnt += 1
 
-        train = images.view(100, 1, 28, 28)
+        train = images.view(batch_size, 1, 28, 28)
         # Clear gradients
         optimizer.zero_grad()
         # Forward propagation
@@ -197,7 +201,7 @@ for epoch in range(epochs):
         (loss + l2Loss).backward()
         #(loss).backward()
         optimizer.step()
-
+        global_step += 1
 print ('Finish Training')
 
 # save model

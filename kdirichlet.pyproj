@@ -4,14 +4,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f0b05eb7-c2cd-4e5a-880b-33c6a64be9a9</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>trainDiri.py</StartupFile>
+    <StartupFile>testRotatedNum.py</StartupFile>
     <SearchPath>outils</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>kdirichlet</Name>
     <RootNamespace>kdirichlet</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>Global|VisualStudio|pdirichlet</InterpreterId>
+    <InterpreterId>Global|VisualStudio|pflowdiri</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,6 +24,7 @@
   <ItemGroup>
     <Compile Include="AysBP.py" />
     <Compile Include="AysSubset.py" />
+    <Compile Include="input_data.py" />
     <Compile Include="printAysSubsetNoise.py" />
     <Compile Include="printAysSubset.py" />
     <Compile Include="rotateImg.py" />
@@ -36,7 +37,7 @@
     <Compile Include="trainDiri.py" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|VisualStudio|pdirichlet" />
+    <InterpreterReference Include="Global|VisualStudio|pflowdiri" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="outils\" />

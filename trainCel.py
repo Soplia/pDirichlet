@@ -5,7 +5,7 @@ import torchvision.transforms as transforms
 import pandas as pd 
 import numpy as np 
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 train = pd.read_csv("../data/train.csv", dtype = np.float32)
 
