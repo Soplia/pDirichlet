@@ -6,15 +6,9 @@ import pandas as pd
 import numpy as np 
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-
 import input_data
 
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
-
-#train = pd.read_csv("../data/train.csv", dtype = np.float32)
-#targets_numpy = train.label.values
-#features_numpy = train.loc[:, train.columns != "label"].values / 255
-
 targets_numpy = np.argmax(mnist.train.labels, axis= 1)
 features_numpy = mnist.train.images 
 
@@ -27,7 +21,7 @@ featuresTrain = torch.from_numpy(features_numpy)
 targetsTrain = torch.from_numpy(targets_numpy).type(torch.LongTensor) 
 
 # Utility parameters
-epochs = 9
+epochs = 20
 batch_size = 100
 numOfClass = 10
 learning_rate = 0.1
@@ -80,33 +74,23 @@ fig, axes = plt.subplots(nrows= 2, ncols= 1)
 for epoch in range(epochs):
     print('Training-epoch: {}'.format(epoch + 1))
     for i, (images, labels) in enumerate(train_loader):
-        train = images.view(100, 1, 28, 28)
-        # Clear gradients
+        train = images.view(batch_size, 1, 28, 28)
         optimizer.zero_grad()
-        # Forward propagation
         outputs = model(train) 
 
-        #acc = torch.sum(torch.argmax(outputs, dim= 1).view(-1, 1) ==
-        #        torch.argmax(labels, dim= 1).view(-1, 1)).item() / labels.shape[0]
         acc = torch.sum(torch.argmax(outputs, dim= 1) ==
                 labels).item() / float(labels.shape[0])
         acc1d.append(acc)
 
-        #Calculate softmax and cross entropy loss
         loss = error(outputs, labels)
         loss1d.append(loss)
-        # Calculating gradients
         loss.backward()
-        # Update parameters  
         optimizer.step()
 
 print ('Finish Training')
 
 # save model
 torch.save(model.state_dict(), '../criticalData/modelCel{}.pt'.format(epochs))
-# save accuracy and loss during training the model
-#torch.save(acc1d, '../criticalData/accTrainCel.pt')
-#torch.save(loss1d, '../criticalData/lossTrainCel.pt')
 
 print ('Finish Saving Files')
 axes[0].plot(acc1d, label= 'Accuracy')

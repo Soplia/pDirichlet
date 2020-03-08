@@ -13,11 +13,6 @@ import matplotlib.pyplot as plt
 import input_data
 
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
-
-#train = pd.read_csv("../data/train.csv", dtype = np.float32)
-#targets_numpy = train.label.values
-#features_numpy = train.loc[:, train.columns != "label"].values / 255
-
 targets_numpy = np.argmax(mnist.train.labels, axis= 1)
 features_numpy = mnist.train.images 
 
@@ -30,11 +25,11 @@ featuresTrain = torch.from_numpy(features_numpy)
 targetsTrain = torch.from_numpy(targets_numpy).type(torch.LongTensor) 
 
 # Utility parameters
-epochs = 9
+epochs = 20
 batch_size = 100
 numOfClass = 10
 
-annealing_step = 10 * (len(features_train) // batch_size)
+annealing_step = 10 * (len(featuresTrain) // batch_size)
 lmb = 0.005
 learning_rate = 0.1
 print(f'{epochs} epochs in training')
@@ -156,10 +151,10 @@ class CNNModel(nn.Module):
         out4 = self.fc2(out3)
         return out4
 
-# Create ANN
+# Create ANN 
 model = CNNModel()
-# SGD Optimizer
 optimizer = torch.optim.SGD(model.parameters(), lr= learning_rate)
+#optimizer = torch.optim.Adam(model.parameters(), lr= learning_rate)
 
 # CNNModel with softmax cross entropy loss function
 acc1d = []
@@ -167,7 +162,7 @@ loss1d = []
 fig, axes = plt.subplots(nrows= 2, ncols= 1)
 
 for epoch in range(epochs):
-    global_step = 100
+    global_step = 10
     print('Training-epoch: {}'.format(epoch + 1))
     for i, (images, labels) in enumerate(train_loader):
         # Change the shape of labels from (images.shape[0]) to 
@@ -183,6 +178,7 @@ for epoch in range(epochs):
         optimizer.zero_grad()
         # Forward propagation
         outputs = model(train) 
+
         evidence = relu_evidence(outputs)
         alpha = evidence + 1
         # u = numOfClass / torch.sum(alpha, dim = 1, keepdims = True)
@@ -207,10 +203,10 @@ print ('Finish Training')
 # save model
 torch.save(model.state_dict(), '../criticalData/modelDiri{}.pt'.format(epochs))
 # save accuracy and loss during training the model
-torch.save(acc1d, '../criticalData/accTrainDiri{}.pt'.format(epochs))
-torch.save(loss1d, '../criticalData/lossTrainDiri{}.pt'.format(epochs))
+#torch.save(acc1d, '../criticalData/accTrainDiri{}.pt'.format(epochs))
+#torch.save(loss1d, '../criticalData/lossTrainDiri{}.pt'.format(epochs))
 # save testing dataset
-np.savez('../data/testRaw.npz', features_test, targets_test)
+np.savez('../data/rotateNumOne.npz', mnist.train.images[4])
 
 print ('Finish Saving Files')
 

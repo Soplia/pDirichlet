@@ -5,12 +5,9 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt 
 import rotateImg 
-import input_data
 
-mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
-
-npzfile = np.load('../data/testRaw.npz')
-feaTh = torch.from_numpy(npzfile['arr_0']).type(torch.float)
+npzfile = np.load('../data/rotateNumOne.npz')
+digit = torch.from_numpy(npzfile['arr_0']).type(torch.float)
 
 class CNNModel(nn.Module):
     def __init__(self):
@@ -35,15 +32,8 @@ class CNNModel(nn.Module):
         return out4
 
 model = CNNModel()
-modelType = 'Cel9' # Diri, Cel, Diri9, Cel9, Diri20
-
+modelType = 'Cel20' #Diri20
 model.load_state_dict(torch.load('../criticalData/model{}.pt'.format(modelType)))
-##digit = feaTh[0]
-digit = mnist.train.images[4].copy()
-#plt.imshow(digit.reshape(28, 28))
-##plt.imshow(digit.view((28, 28)))
-#plt.show()
 
+model.eval()
 rotateImg.rotating_image_classification(digit, model)
-#np.savez('../data/roatedDigitLabel.npz', tarTh[1])
-#print ('Finish saving file!!!')
