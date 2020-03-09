@@ -20,6 +20,7 @@ features_train, features_test, targets_train, targets_test = train_test_split(fe
                                                                                                                     targets_numpy,
                                                                                                                     test_size = 0.2,
                                                                                                                     random_state = 42) 
+
 # Create feature and targets tensor for train set.
 featuresTrain = torch.from_numpy(features_numpy)
 targetsTrain = torch.from_numpy(targets_numpy).type(torch.LongTensor) 
@@ -202,11 +203,12 @@ print ('Finish Training')
 
 # save model
 torch.save(model.state_dict(), '../criticalData/modelDiri{}.pt'.format(epochs))
-# save accuracy and loss during training the model
-#torch.save(acc1d, '../criticalData/accTrainDiri{}.pt'.format(epochs))
-#torch.save(loss1d, '../criticalData/lossTrainDiri{}.pt'.format(epochs))
-# save testing dataset
+
+# save testing rotated number dataset
 np.savez('../data/rotateNumOne.npz', mnist.train.images[4])
+
+# save test dataset
+np.savez('../data/testRaw.npz', features_test, targets_test)
 
 print ('Finish Saving Files')
 

@@ -11,11 +11,6 @@ npzfile = np.load('../data/testRaw.npz')
 feaTh = torch.from_numpy(npzfile['arr_0']).type(torch.float)
 tarTh = torch.from_numpy(npzfile['arr_1']).type(torch.int)
 
-# batchSize = 100
-# testDs = torch.utils.data.Dataset(feaTh, tarNp)
-# testLd = torch.utils.data.DataLoader(testDs, batch_size= batchSize)
-
-# Define a class CNNmodelSf with the classical softmax
 class CNNModel(nn.Module):
     def __init__(self):
         super(CNNModel, self).__init__()
@@ -38,12 +33,12 @@ class CNNModel(nn.Module):
         out4 = self.fc2(out3)
         return out4
 
+modelType = 'Cel20' # Diri20, Cel20
+
 model = CNNModel()
-modelType = 'Diri9' # Diri, Cel, Diri, Cel
-
 model.load_state_dict(torch.load('../criticalData/model{}.pt'.format(modelType)))
-
 model.eval()
+
 outputs = model(feaTh.view(feaTh.shape[0], 1, 28, 28))
 outputs = outputs.detach()
 predictions = torch.argmax(outputs.data, dim= 1)

@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 
 thsd = np.load('../criticalData/thsd_uncertain.npz')['arr_0']
 
-# Cel, CelNoise20, CelNoise40, CelNoise60
-# Diri, DiriNoise20, DiriNoise40, DiriNoise60 
-modelTypeList = ['Cel', 'CelNoise20', 'CelNoise40', 'CelNoise60',
-                              'Diri', 'DiriNoise20', 'DiriNoise40', 'DiriNoise60']
+# Cel20, Cel20Noise20, Cel20Noise40, Cel20Noise60
+# Diri20, Diri20Noise20, Diri20Noise40, Diri20Noise60 
+modelTypeList = ['Cel20', 'Cel20Noise1', 'Cel20Noise10', 'Cel20Noise20',
+                              'Diri20', 'Diri20Noise1', 'Diri20Noise10', 'Diri20Noise20']
 
 beliefList = []
 accList = []

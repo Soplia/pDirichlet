@@ -3,10 +3,10 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt 
 
-# Cel, CelNoise20, CelNoise40, CelNoise60
-# Diri, DiriNoise20, DiriNoise40, DiriNoise60 
-modelType = 'DiriNoise60' 
-npzfile = np.load('../data/test{}.npz'.format(modelType))
+# Cel20, Cel20Noise1, Cel20Noise10, Cel20Noise20
+# Diri20, Diri20Noise1, Diri20Noise10, Diri20Noise20 
+modelType = 'Cel20' 
+npzfile = np.load('../data/test{0}.npz'.format(modelType))
 
 outputs = npzfile['arr_0']
 labels = npzfile['arr_1']

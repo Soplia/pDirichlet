@@ -13,7 +13,7 @@ tarTh = torch.from_numpy(npzfile['arr_1']).type(torch.int)
 
 # Add some noise to the feature_test
 Amp = 0.2 #between 0 and 1
-modelType = 'Diri' # Diri, Cel
+modelType = 'Diri20' #Diri, Cel
 
 feaShape = feaTh.numpy().shape
 noise = np.zeros(feaShape)
