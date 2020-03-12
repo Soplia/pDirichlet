@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f0b05eb7-c2cd-4e5a-880b-33c6a64be9a9</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>printAysSubset.py</StartupFile>
+    <StartupFile>testD5.py</StartupFile>
     <SearchPath>outils</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -34,13 +34,25 @@
     <Compile Include="testAgwn.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="testC5.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="testDC.py" />
+    <Compile Include="testD5.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="testNoise.py" />
     <Compile Include="testRotatedNum.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="trainCel.py" />
+    <Compile Include="trainCel5.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="trainDiri.py" />
+    <Compile Include="trainDiri5.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|VisualStudio|pflowdiri" />

@@ -1,3 +1,4 @@
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,19 +10,19 @@ import matplotlib.pyplot as plt
 import input_data
 
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+
 targets_numpy = np.argmax(mnist.train.labels, axis= 1)
 features_numpy = mnist.train.images 
 
-features_train, features_test, targets_train, targets_test = train_test_split(features_numpy,
-                                                                                                                    targets_numpy,
-                                                                                                                    test_size = 0.2,
-                                                                                                                    random_state = 42) 
+targets_train = targets_numpy[targets_numpy < 5]
+features_train = features_numpy[targets_numpy < 5]
+
 # Create feature and targets tensor for train set.
-featuresTrain = torch.from_numpy(features_numpy)
-targetsTrain = torch.from_numpy(targets_numpy).type(torch.LongTensor) 
+featuresTrain = torch.from_numpy(features_train)
+targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
 
 # Utility parameters
-epochs = 21
+epochs = 9
 batch_size = 100
 numOfClass = 10
 learning_rate = 0.1
@@ -37,7 +38,7 @@ train_loader = torch.utils.data.DataLoader(train,
                                                                      shuffle = False)
 
 def softmax_evidence(logits):
-    return F.softmax(logits, dim= 1)
+    return F.softmax(logits)
 
 #Computes half the L2 norm of a tensor without the sqrt
 def L2Loss(inputs):
@@ -59,14 +60,13 @@ class CNNModel(nn.Module):
         self.maxPool = nn.MaxPool2d(kernel_size= 2)
         self.dropout = nn.Dropout(.5)
         #all rows add up to 1
-        #self.softmax = nn.Softmax(dim= 1)
+        self.softmax = nn.Softmax(dim= 1)
 
     def forward(self, input):
         out1 = self.maxPool(self.relu(self.conv1(input)))
         out2 = self.maxPool(self.relu(self.conv2(out1)))
         out3 = self.dropout(self.relu(self.fc1(out2.view(out2.size(0), -1))))
-        #out4 = self.softmax(self.fc2(out3))
-        out4 = self.fc2(out3)
+        out4 = self.softmax(self.fc2(out3))
         return out4
 
 model = CNNModel()
@@ -81,21 +81,18 @@ fig, axes = plt.subplots(nrows= 2, ncols= 1)
 for epoch in range(epochs):
     print('Training-epoch: {}'.format(epoch + 1))
     for i, (images, labels) in enumerate(train_loader):
-        train = images.view(batch_size, 1, 28, 28)
+        train = images.view(-1, 1, 28, 28)
         optimizer.zero_grad()
         outputs = model(train) 
 
-        evidence = softmax_evidence(outputs)
-
-        acc = torch.sum(torch.argmax(evidence, dim= 1) ==
+        acc = torch.sum(torch.argmax(outputs, dim= 1) ==
                 labels).item() / float(labels.shape[0])
         acc1d.append(acc)
 
-        loss1 = error(evidence, labels)
+        loss1 = error(outputs, labels)
         loss2 = (L2Loss(model.state_dict()['fc1.weight']) + 
                          L2Loss(model.state_dict()['fc2.weight'])) * lmb 
         loss = loss1 + loss2
-        #loss = loss1
 
         loss1d.append(loss)
         loss.backward()
@@ -104,9 +101,9 @@ for epoch in range(epochs):
 print ('Finish Training')
 
 # save model
-torch.save(model.state_dict(), '../criticalData/modelCel{}.pt'.format(epochs))
-print ('Finish Saving Files')
+torch.save(model.state_dict(), '../criticalData/model5Cel{}.pt'.format(epochs))
 
+print ('Finish Saving Files')
 axes[0].plot(acc1d, label= 'Accuracy')
 axes[1].plot(loss1d, label= 'Loss')
 axes[0].set_ylabel('AccVal')

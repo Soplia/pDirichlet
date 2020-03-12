@@ -13,20 +13,19 @@ import matplotlib.pyplot as plt
 import input_data
 
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+
 targets_numpy = np.argmax(mnist.train.labels, axis= 1)
 features_numpy = mnist.train.images 
 
-features_train, features_test, targets_train, targets_test = train_test_split(features_numpy,
-                                                                                                                    targets_numpy,
-                                                                                                                    test_size = 0.2,
-                                                                                                                    random_state = 42) 
+targets_train = targets_numpy[targets_numpy < 5]
+features_train = features_numpy[targets_numpy < 5]
 
 # Create feature and targets tensor for train set.
-featuresTrain = torch.from_numpy(features_numpy)
-targetsTrain = torch.from_numpy(targets_numpy).type(torch.LongTensor) 
+featuresTrain = torch.from_numpy(features_train)
+targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
 
 # Utility parameters
-epochs = 20
+epochs = 9
 batch_size = 100
 numOfClass = 10
 
@@ -123,7 +122,7 @@ def exp_evidence(logits):
     return torch.exp(logits / 1000)
 
 def softmax_evidence(logits):
-    return F.softmax(logits, dim = 1)
+    return F.softmax(logits)
 
 #Computes half the L2 norm of a tensor without the sqrt
 def L2Loss(inputs):
@@ -174,7 +173,7 @@ for epoch in range(epochs):
             newLabels[cnt, pos] = 1.0
             cnt += 1
 
-        train = images.view(batch_size, 1, 28, 28)
+        train = images.view(-1, 1, 28, 28)
         # Clear gradients
         optimizer.zero_grad()
         # Forward propagation
@@ -202,14 +201,7 @@ for epoch in range(epochs):
 print ('Finish Training')
 
 # save model
-torch.save(model.state_dict(), '../criticalData/modelDiri{}.pt'.format(epochs))
-
-# save testing rotated number dataset
-np.savez('../data/rotateNumOne.npz', mnist.train.images[4])
-
-# save test dataset
-np.savez('../data/testRaw.npz', features_test, targets_test)
-
+torch.save(model.state_dict(), '../criticalData/model5Diri{}.pt'.format(epochs))
 print ('Finish Saving Files')
 
 axes[0].plot(acc1d, label= 'Accuracy')

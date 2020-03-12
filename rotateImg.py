@@ -9,11 +9,17 @@ import scipy.ndimage as nd
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt 
 
+def softmax_evidence(logits):
+    return F.softmax(logits, dim= 1)
+
+def relu_evidence(logits):
+    return F.relu(logits)
+
 # img: digit image (28, 28)
 def rotating_image_classification(img, model, 
-    numClass= 10, dims=(28, 28), threshold= 0.5, 
+    numClass= 10, dims=(28, 28), threshold= 0.25, 
     c=['black','blue','brown','purple','cyan','red'] * 2, 
-    marker=['s','^','o', '>'] * 4):
+    marker=['s','^','o', '>'] * 4, type = 'diri'):
 
     outputsSave = np.zeros((1, 10))
     Mdeg = 180 
@@ -32,13 +38,24 @@ def rotating_image_classification(img, model,
         outputs = outputs.detach()
         outputsSave = np.vstack((outputsSave, outputs))
 
-        evidence = outputs * (outputs > 0)
-        alpha = evidence + 1
-        u = numClass / torch.sum(alpha, dim = 1, keepdims = True)
-        lu.append(u)
+        if type == 'diri':
+            evidence = relu_evidence(outputs)
+            alpha = evidence + 1
+            u = numClass / torch.sum(alpha, dim = 1, keepdims = True)
+            lu.append(u)
+            probability = alpha / torch.sum (alpha, dim = 1, keepdims = True)
+            probability[probability < threshold] = 0
 
-        probability = alpha / torch.sum (alpha, dim = 1, keepdims = True)
-        probability[probability < threshold] = 0
+        else:
+            threshold= 0.1
+            evidence = softmax_evidence(outputs)
+            probability = evidence
+            #probability[probability < threshold] = 0
+            alpha = evidence + 1
+            u = numClass / torch.sum(alpha, dim = 1, keepdims = True)
+            #u = np.count_nonzero(probability) / numClass
+            lu.append(u)
+        
         lp = np.vstack((lp, probability.numpy()))
         ldeg.append(deg)
 

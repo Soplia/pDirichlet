@@ -5,10 +5,23 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt 
 import rotateImg 
+import Agwn
 
-npzfile = np.load('../data/rotateNumOne.npz')
-digit = torch.from_numpy(npzfile['arr_0']).type(torch.float)
+npzfile = np.load('../data/testRaw.npz')
+feaNp = npzfile['arr_0']
+tarTh = torch.from_numpy(npzfile['arr_1']).type(torch.int)
 
+# Cel20Noise1, Cel20Noise10, Cel20Noise20
+# Diri20Noise1, Diri20Noise10, Diri20Noise20 
+modelType = 'Cel20' #Diri, Cel
+snr = 1
+
+#add guassin white noise
+for i in range(feaNp.shape[0]):
+    feaNp[i, :] += Agwn.wgn(feaNp[i, :], snr)
+feaTh = torch.from_numpy(feaNp)
+
+# Define a class CNNmodelSf with the classical softmax
 class CNNModel(nn.Module):
     def __init__(self):
         super(CNNModel, self).__init__()
@@ -32,9 +45,15 @@ class CNNModel(nn.Module):
         return out4
 
 model = CNNModel()
-modelType = 'Cel9' #Diri20
 model.load_state_dict(torch.load('../criticalData/model{}.pt'.format(modelType)))
-
 model.eval()
-#type = cel , diri
-rotateImg.rotating_image_classification(digit, model, type= 'cel')
+
+outputs = model(feaTh.view(feaTh.shape[0], 1, 28, 28))
+outputs = outputs.detach()
+predictions = torch.argmax(outputs.data, dim= 1)
+acc = (predictions == tarTh).sum() / float(predictions.shape[0])
+print ('The acc of test dataset is {}'.format(100 * acc))
+
+#np.savez('../data/testDiri.npz', outputs.numpy(), tarTh.numpy())
+np.savez('../data/test{0}Noise{1}.npz'.format(modelType, (int)(snr)), outputs.numpy(), tarTh.numpy())
+print ('File saved!!!')
