@@ -118,12 +118,10 @@ def loss_eq3(p, alpha, numOfClass, global_step, annealing_step):
 # Three types evidence
 def relu_evidence(logits):
     return F.relu(logits)
-
-def exp_evidence(logits): 
-    return torch.exp(logits / 1000)
-
 def softmax_evidence(logits):
     return F.softmax(logits, dim = 1)
+def exp_evidence(logits): 
+    return torch.exp(logits / 1000)
 
 #Computes half the L2 norm of a tensor without the sqrt
 def L2Loss(inputs):
