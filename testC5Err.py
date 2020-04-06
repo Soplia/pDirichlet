@@ -58,10 +58,8 @@ print ('The acc of test dataset is {}'.format(100 * acc))
 
 #Calculate uncertainty for class
 
-threshold= 0.1
-probability = evidence
-probability[probability < threshold] = 0
-u = np.count_nonzero(probability, axis= 1) / numClass
+evidenceSoftmax = softmax_evidence(outputs)
+u = 1 - torch.max(evidenceSoftmax, dim= 1).values
 
 cnt = np.zeros(10)
 lu = np.zeros(10)
@@ -86,7 +84,8 @@ plt.plot(lu, marker='*', c='black', label= 'uncertainty')
 plt.xticks(np.arange(10))
 plt.xlabel('class')
 plt.ylabel('uncertainty')
-plt.title("Cel5-Uncertainty")
+plt.title("Cel5-ProbabilityOfErr")
 plt.show()
 #np.savez('../data/test{}.npz'.format(modelType), outputs.numpy(), tarTh.numpy())
+
 

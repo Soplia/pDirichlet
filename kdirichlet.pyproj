@@ -4,14 +4,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f0b05eb7-c2cd-4e5a-880b-33c6a64be9a9</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>AysSubsetPr.py</StartupFile>
+    <StartupFile>trainDiri5QuickDraw.py</StartupFile>
     <SearchPath>outils</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>kdirichlet</Name>
     <RootNamespace>kdirichlet</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>Global|VisualStudio|pflowdiri</InterpreterId>
+    <InterpreterId>CondaEnv|CondaEnv|pflowdiri</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,6 +31,9 @@
     <Compile Include="AysBP.py" />
     <Compile Include="AysSubset.py" />
     <Compile Include="AysSubsetPr.py" />
+    <Compile Include="GenerateQuickDrawDataset.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="input_data.py" />
     <Compile Include="pltPRCurve.py">
       <SubType>Code</SubType>
@@ -42,6 +45,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="testC5.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="testC5Err.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="testD5Err.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="testDC.py" />
@@ -63,9 +72,12 @@
     <Compile Include="trainDiri5.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="trainDiri5QuickDraw.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|VisualStudio|pflowdiri" />
+    <InterpreterReference Include="CondaEnv|CondaEnv|pflowdiri" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="outils\" />

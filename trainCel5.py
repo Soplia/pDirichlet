@@ -24,7 +24,7 @@ targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor)
 # Utility parameters
 epochs = 9
 batch_size = 100
-numOfClass = 10
+numOfClass = 5
 learning_rate = 0.1
 lmb = 0.005
 
@@ -54,7 +54,7 @@ class CNNModel(nn.Module):
                                                 kernel_size= 5, padding= 0)
 
         self.fc1 = nn.Linear(4 * 4 * 50, 500)
-        self.fc2 = nn.Linear(500, 10)
+        self.fc2 = nn.Linear(500, 5)
 
         self.relu = nn.ReLU()
         self.maxPool = nn.MaxPool2d(kernel_size= 2)

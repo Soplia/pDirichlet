@@ -10,12 +10,11 @@ import pandas as pd
 import numpy as np 
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt 
-import input_data
 
-mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+npzfile = np.load('../data/quickdrawdataset.npz')
 
-targets_numpy = np.argmax(mnist.train.labels, axis= 1)
-features_numpy = mnist.train.images 
+features_numpy = npzfile['arr_0']  / 255
+targets_numpy = npzfile['arr_1'] 
 
 targets_train = targets_numpy[targets_numpy < 5]
 features_train = features_numpy[targets_numpy < 5]
@@ -201,7 +200,7 @@ for epoch in range(epochs):
 print ('Finish Training')
 
 # save model
-torch.save(model.state_dict(), '../criticalData/model5Diri{}.pt'.format(epochs))
+torch.save(model.state_dict(), '../criticalData/model5DiriQuickdraw{}.pt'.format(epochs))
 print ('Finish Saving Files')
 
 axes[0].plot(acc1d, label= 'Accuracy')

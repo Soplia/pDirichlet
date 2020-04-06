@@ -49,19 +49,17 @@ model.eval()
 
 outputs = model(feaTh.view(feaTh.shape[0], 1, 28, 28))
 outputs = outputs.detach()
-
-evidence = softmax_evidence(outputs)
-
-predictions = torch.argmax(evidence.data, dim= 1)
+predictions = torch.argmax(outputs.data, dim= 1)
 acc = (predictions == tarTh).sum() / float(predictions.shape[0])
 print ('The acc of test dataset is {}'.format(100 * acc))
 
+for i in np.arange(10):
+    print (np.sum(tarTh.numpy() == i), end =" , ")
+    print (np.sum(predictions.numpy() == i))
 #Calculate uncertainty for class
 
-threshold= 0.1
-probability = evidence
-probability[probability < threshold] = 0
-u = np.count_nonzero(probability, axis= 1) / numClass
+evidenceSoftmax = softmax_evidence(outputs)
+u = 1 - torch.max(evidenceSoftmax, dim= 1).values
 
 cnt = np.zeros(10)
 lu = np.zeros(10)
@@ -74,19 +72,17 @@ for i in predictions.numpy():
     lu[i] = lu[i] + u[pos]
     pos = pos + 1
 
-for i in np.arange(10):
-    print (np.sum(tarTh.numpy() == i), end =" , ")
-    print (np.sum(predictions.numpy() == i))
-
 lu = lu / cnt
+
 for i in range(10):
     if (cnt[i] == 0):
         lu[i] = 1
+
 plt.plot(lu, marker='*', c='black', label= 'uncertainty')
 plt.xticks(np.arange(10))
 plt.xlabel('class')
 plt.ylabel('uncertainty')
-plt.title("Cel5-Uncertainty")
+plt.title('Diri-ProbabilityOfErr')
 plt.show()
 #np.savez('../data/test{}.npz'.format(modelType), outputs.numpy(), tarTh.numpy())
 
