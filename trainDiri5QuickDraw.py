@@ -12,21 +12,23 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt 
 
 npzfile = np.load('../data/quickdrawdataset.npz')
-
-features_numpy = npzfile['arr_0']  / 255
+features_numpy = npzfile['arr_0'] / 255.0
 targets_numpy = npzfile['arr_1'] 
 
-targets_train = targets_numpy[targets_numpy < 5]
-features_train = features_numpy[targets_numpy < 5]
+numOfClass = 10
+targets_train = targets_numpy[targets_numpy < numOfClass]
+features_train = features_numpy[targets_numpy < numOfClass]
 
-# Create feature and targets tensor for train set.
-featuresTrain = torch.from_numpy(features_train)
+idx = np.random.randint(0, len(features_train))
+plt.imshow(features_train[idx].reshape(28,28)) 
+#plt.show()
+
+featuresTrain = torch.from_numpy(features_train).type(torch.FloatTensor)
 targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
 
 # Utility parameters
-epochs = 9
+epochs = 1
 batch_size = 100
-numOfClass = 5
 
 annealing_step = 10 * (len(featuresTrain) // batch_size)
 lmb = 0.005
@@ -137,11 +139,11 @@ class CNNModel(nn.Module):
                                                 kernel_size= 5, padding= 0)
 
         self.fc1 = nn.Linear(4 * 4 * 50, 500)
-        self.fc2 = nn.Linear(500, 5)
+        self.fc2 = nn.Linear(500, numOfClass)
 
         self.relu = nn.ReLU()
         self.maxPool = nn.MaxPool2d(kernel_size= 2)
-        self.dropout = nn.Dropout(.5)
+        self.dropout = nn.Dropout(.1)
 
     def forward(self, input):
         out1 = self.maxPool(self.relu(self.conv1(input)))
@@ -166,7 +168,7 @@ for epoch in range(epochs):
     for i, (images, labels) in enumerate(train_loader):
         # Change the shape of labels from (images.shape[0]) to 
         # (images.shape[0], 10)
-        newLabels = torch.zeros((labels.shape[0], 10), dtype= torch.float32)
+        newLabels = torch.zeros((labels.shape[0], numOfClass), dtype= torch.float32)
         cnt = 0
         for pos in labels:
             newLabels[cnt, pos] = 1.0
@@ -190,6 +192,7 @@ for epoch in range(epochs):
         loss = torch.mean(loss_eq5(newLabels, alpha, numOfClass, global_step, annealing_step))
         l2Loss = (L2Loss(model.state_dict()['fc1.weight']) + 
                          L2Loss(model.state_dict()['fc2.weight'])) * lmb 
+        
         loss1d.append(loss + l2Loss)
         #loss1d.append(loss)
 

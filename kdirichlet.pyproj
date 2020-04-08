@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f0b05eb7-c2cd-4e5a-880b-33c6a64be9a9</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>trainDiri5QuickDraw.py</StartupFile>
+    <StartupFile>testUPED5.py</StartupFile>
     <SearchPath>outils</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -64,8 +64,14 @@
     <Compile Include="testRotatedNum.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="testUPED5.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="trainCel.py" />
     <Compile Include="trainCel5.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="trainCel5QuickDraw.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="trainDiri.py" />

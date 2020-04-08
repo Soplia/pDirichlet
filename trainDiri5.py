@@ -17,8 +17,13 @@ mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 targets_numpy = np.argmax(mnist.train.labels, axis= 1)
 features_numpy = mnist.train.images 
 
-targets_train = targets_numpy[targets_numpy < 5]
-features_train = features_numpy[targets_numpy < 5]
+numOfClass = 5
+targets_train = targets_numpy[targets_numpy < numOfClass]
+features_train = features_numpy[targets_numpy < numOfClass]
+
+#targets_test = targets_numpy[targets_numpy >= numOfClass]
+#features_test = features_numpy[targets_numpy >= numOfClass]
+#np.savez('../data/testLastFiveClass.npz', features_test, targets_test)
 
 # Create feature and targets tensor for train set.
 featuresTrain = torch.from_numpy(features_train)
@@ -27,7 +32,6 @@ targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor)
 # Utility parameters
 epochs = 9
 batch_size = 100
-numOfClass = 5
 
 annealing_step = 10 * (len(featuresTrain) // batch_size)
 lmb = 0.005
@@ -138,7 +142,7 @@ class CNNModel(nn.Module):
                                                 kernel_size= 5, padding= 0)
 
         self.fc1 = nn.Linear(4 * 4 * 50, 500)
-        self.fc2 = nn.Linear(500, 5)
+        self.fc2 = nn.Linear(500, numOfClass)
 
         self.relu = nn.ReLU()
         self.maxPool = nn.MaxPool2d(kernel_size= 2)
@@ -159,7 +163,6 @@ optimizer = torch.optim.SGD(model.parameters(), lr= learning_rate)
 # CNNModel with softmax cross entropy loss function
 acc1d = []
 loss1d = []
-fig, axes = plt.subplots(nrows= 2, ncols= 1)
 
 for epoch in range(epochs):
     global_step = 10
@@ -167,7 +170,7 @@ for epoch in range(epochs):
     for i, (images, labels) in enumerate(train_loader):
         # Change the shape of labels from (images.shape[0]) to 
         # (images.shape[0], 10)
-        newLabels = torch.zeros((labels.shape[0], 10), dtype= torch.float32)
+        newLabels = torch.zeros((labels.shape[0], numOfClass), dtype= torch.float32)
         cnt = 0
         for pos in labels:
             newLabels[cnt, pos] = 1.0
@@ -204,6 +207,7 @@ print ('Finish Training')
 torch.save(model.state_dict(), '../criticalData/model5Diri{}.pt'.format(epochs))
 print ('Finish Saving Files')
 
+fig, axes = plt.subplots(nrows= 2, ncols= 1)
 axes[0].plot(acc1d, label= 'Accuracy')
 axes[1].plot(loss1d, label= 'Loss')
 axes[0].set_ylabel('AccVal')

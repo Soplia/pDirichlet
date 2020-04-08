@@ -27,7 +27,7 @@ class CNNModel(nn.Module):
                                                 kernel_size= 5, padding= 0)
 
         self.fc1 = nn.Linear(4 * 4 * 50, 500)
-        self.fc2 = nn.Linear(500, 10)
+        self.fc2 = nn.Linear(500, 5)
 
         self.relu = nn.ReLU()
         self.maxPool = nn.MaxPool2d(kernel_size= 2)
@@ -41,7 +41,7 @@ class CNNModel(nn.Module):
         return out4
 
 modelType = '5Cel9' # Diri20, Cel20
-numClass = 10
+numClass = 5
 
 model = CNNModel()
 model.load_state_dict(torch.load('../criticalData/model{}.pt'.format(modelType)))
@@ -58,6 +58,8 @@ for i in np.arange(10):
     print (np.sum(predictions.numpy() == i))
 #Calculate uncertainty for class
 
+#Just use the original outputs?
+# Use the softmax compare with real labels
 evidenceSoftmax = softmax_evidence(outputs)
 u = 1 - torch.max(evidenceSoftmax, dim= 1).values
 
