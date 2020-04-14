@@ -20,6 +20,7 @@ features_numpy = mnist.train.images
 numOfClass = 5
 targets_train = targets_numpy[targets_numpy < numOfClass]
 features_train = features_numpy[targets_numpy < numOfClass]
+np.savez('../data/testTenClass.npz', features_numpy, targets_numpy)
 
 #targets_test = targets_numpy[targets_numpy >= numOfClass]
 #features_test = features_numpy[targets_numpy >= numOfClass]

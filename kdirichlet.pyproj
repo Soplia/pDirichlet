@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f0b05eb7-c2cd-4e5a-880b-33c6a64be9a9</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>testUPED5.py</StartupFile>
+    <StartupFile>QuickDrawK.py</StartupFile>
     <SearchPath>outils</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -40,6 +40,9 @@
     </Compile>
     <Compile Include="printAysSubsetNoise.py" />
     <Compile Include="printAysSubset.py" />
+    <Compile Include="QuickDrawK.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="rotateImg.py" />
     <Compile Include="testAgwn.py">
       <SubType>Code</SubType>
@@ -62,6 +65,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="testRotatedNum.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="testTC.py" />
+    <Compile Include="testUPEC5.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="testUPED5.py">

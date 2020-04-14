@@ -14,8 +14,10 @@ mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 targets_numpy = np.argmax(mnist.train.labels, axis= 1)
 features_numpy = mnist.train.images 
 
-targets_train = targets_numpy[targets_numpy < 5]
-features_train = features_numpy[targets_numpy < 5]
+numOfClass = 5
+
+targets_train = targets_numpy[targets_numpy < numOfClass]
+features_train = features_numpy[targets_numpy < numOfClass]
 
 # Create feature and targets tensor for train set.
 featuresTrain = torch.from_numpy(features_train)
@@ -24,7 +26,6 @@ targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor)
 # Utility parameters
 epochs = 9
 batch_size = 100
-numOfClass = 5
 learning_rate = 0.1
 lmb = 0.005
 
@@ -54,7 +55,7 @@ class CNNModel(nn.Module):
                                                 kernel_size= 5, padding= 0)
 
         self.fc1 = nn.Linear(4 * 4 * 50, 500)
-        self.fc2 = nn.Linear(500, 5)
+        self.fc2 = nn.Linear(500, numOfClass)
 
         self.relu = nn.ReLU()
         self.maxPool = nn.MaxPool2d(kernel_size= 2)
