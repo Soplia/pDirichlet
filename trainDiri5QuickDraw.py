@@ -10,28 +10,30 @@ import pandas as pd
 import numpy as np 
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt 
+from Modelj import * 
 
 npzfile = np.load('./Dataset/train.npz')
 features_numpy = npzfile['data'] / 255.0
 targets_numpy = npzfile['target'] 
 
 numOfClass = 5
+
 targets_train = targets_numpy[targets_numpy < numOfClass]
 features_train = features_numpy[targets_numpy < numOfClass]
 
-idx = np.random.randint(0, len(features_train))
-plt.imshow(features_train[idx].reshape(28,28)) 
+#idx = np.random.randint(0, len(features_train))
+#plt.imshow(features_train[idx].reshape(28,28)) 
 #plt.show()
 
 featuresTrain = torch.from_numpy(features_train).type(torch.FloatTensor)
 targetsTrain = torch.from_numpy(targets_train).type(torch.LongTensor) 
 
-# Utility parameters
 epochs = 9
 batch_size = 256
 annealing_step = 10 * (len(featuresTrain) // batch_size)
 lmb = 0.005
 learning_rate = 0.1
+
 print(f'{epochs} epochs in training')
 
 # Pytorch train and test sets
@@ -128,29 +130,7 @@ def softmax_evidence(logits):
 def L2Loss(inputs):
     return torch.sum(inputs ** 2) / 2
 
-class CNNModel(nn.Module):
-    def __init__(self):
-        super(CNNModel, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels= 1, out_channels= 20, stride= 1, 
-                                                kernel_size= 5, padding= 0)
-        self.conv2 = nn.Conv2d(in_channels= 20, out_channels= 50, stride= 1, 
-                                                kernel_size= 5, padding= 0)
-
-        self.fc1 = nn.Linear(4 * 4 * 50, 500)
-        self.fc2 = nn.Linear(500, numOfClass)
-
-        self.relu = nn.ReLU()
-        self.maxPool = nn.MaxPool2d(kernel_size= 2)
-        self.dropout = nn.Dropout(.1)
-
-    def forward(self, input):
-        out1 = self.maxPool(self.relu(self.conv1(input)))
-        out2 = self.maxPool(self.relu(self.conv2(out1)))
-        out3 = self.dropout(self.relu(self.fc1(out2.view(out2.size(0), -1))))
-        out4 = self.fc2(out3)
-        return out4
-
-model = CNNModel()
+model = CNNModel(numOfClass)
 optimizer = torch.optim.SGD(model.parameters(), lr= learning_rate)
 #optimizer = torch.optim.Adam(model.parameters(), lr= learning_rate)
 

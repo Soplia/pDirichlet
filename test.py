@@ -1,11 +1,12 @@
-
 import numpy as np
 #import pdb
 import torch
 import matplotlib.pyplot as plt
 
-outputs = np.load('./data/test5CelQuickdraw10outputs.npz')
-labels = np.load('./data/test5CelQuickdraw10realLabel.npz')
+#outputs = np.load('./data/test5CelQuickdraw10outputs.npz')
+#labels = np.load('./data/test5CelQuickdraw10realLabel.npz')
+outputs = np.load('./data/test5DiriQuickdraw10outputs.npz')
+labels = np.load('./data/test5DiriQuickdraw10realLabel.npz')
 outputs = outputs['arr_0']
 labels = labels['arr_0']
 outputs = torch.from_numpy(outputs)

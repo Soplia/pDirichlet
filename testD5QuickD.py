@@ -5,6 +5,7 @@ import torchvision.transforms as transforms
 import pandas as pd 
 import numpy as np 
 import matplotlib.pyplot as plt 
+from Modelj import *
 
 npzfile10 = np.load('./Dataset/test.npz')
 feaTh10 = torch.from_numpy(npzfile10['data'] / 255.0).type(torch.FloatTensor)
@@ -18,31 +19,9 @@ numOfClass = 5
 def relu_evidence(logits):
     return F.relu(logits)
 
-class CNNModel(nn.Module):
-    def __init__(self):
-        super(CNNModel, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels= 1, out_channels= 20, stride= 1, 
-                                                kernel_size= 5, padding= 0)
-        self.conv2 = nn.Conv2d(in_channels= 20, out_channels= 50, stride= 1, 
-                                                kernel_size= 5, padding= 0)
-
-        self.fc1 = nn.Linear(4 * 4 * 50, 500)
-        self.fc2 = nn.Linear(500, numOfClass)
-
-        self.relu = nn.ReLU()
-        self.maxPool = nn.MaxPool2d(kernel_size= 2)
-        self.dropout = nn.Dropout(.5)
-
-    def forward(self, input):
-        out1 = self.maxPool(self.relu(self.conv1(input)))
-        out2 = self.maxPool(self.relu(self.conv2(out1)))
-        out3 = self.dropout(self.relu(self.fc1(out2.view(out2.size(0), -1))))
-        out4 = self.fc2(out3)
-        return out4
-
 modelType = '5DiriQuickdraw9'
 
-model = CNNModel()
+model = CNNModel(numOfClass)
 model.load_state_dict(torch.load('./criticalData/model{}.pt'.format(modelType)))
 model.eval()
 
@@ -58,57 +37,55 @@ predictions = evidence.data.max(1)[1]
 acc = float(predictions.eq(tarTh10.data).sum()) / predictions.shape[0]
 print ('The acc of test dataset is {}'.format(100 * acc))
 
-print (torch.sum(evidence, dim= 1))
-print (torch.sum(evidence, dim= 1).shape)
-print (torch.max(evidence, dim= 1))
-#Calculate uncertainty for class
-
 probabilityErr = 1 - torch.max(evidence, dim= 1).values
 uevidence = relu_evidence(outputs10)
 alpha = uevidence + 1
 uncertainty = numOfClass / torch.sum(alpha, dim = 1, keepdims = True)
 
-cnt = np.zeros(10)
-probabilityErrList = np.zeros(10)
-uncertaintyList = np.zeros(10)
-
-# 根据真实标签进行统计
-# 各个类别（10）的实例数目
-# according to real label count the instance number 
-# of each class
-for i in tarTh10:
-    cnt[i] = cnt[i ] + 1
-
-# 根据实际预测
-# 统计各个类别（10）的错误预测率
-# according to prediction count probabilityErr
-# and uncertainty
+cntPre = np.zeros(10)
+proErrListPre = np.zeros(10)
+uncerListPre = np.zeros(10)
 pos = 0
 for i in predictions.numpy():
-    probabilityErrList[i] = probabilityErrList[i] + probabilityErr[pos]
-    pos = pos + 1
+    cntPre[i] += 1
+    proErrListPre[i] += probabilityErr[pos]
+    uncerListPre[i] += uncertainty[pos]
+    pos += 1
 
+cntReal = np.zeros(10)
+proErrListReal = np.zeros(10)
+uncerListReal = np.zeros(10)
 pos = 0
-for i in predictions.numpy():
-    uncertaintyList[i] = uncertaintyList[i] + uncertainty[pos]
-    pos = pos + 1
-#for i in np.arange(numOfClass):
-#    print (np.sum(tarTh.numpy() == i), end =" , ")
-#    print (np.sum(predictions.numpy() == i))
+for i in tarTh10:  
+    cntReal[i] += 1
+    proErrListReal[i] += probabilityErr[pos]
+    uncerListReal[i] += uncertainty[pos]
+    pos += 1
 
+print ('class&numOfInsR&proErrR&uncertaintyR&numOfInsP&proErrP&uncertaintyP\\\\')
 for i in range(10):
-    print ("{}  &  {}  &  {}  &  {} \\\\".format(i, cnt[i], probabilityErrList[i], uncertaintyList[i]))
+    print ("%1d  &  %4d  &  %5.2f  &  %5.2f &  %4d  &  %5.2f  &  %5.2f \\\\" \
+        %(i, cntReal[i], proErrListReal[i], uncerListReal[i],\
+        cntPre[i], proErrListPre[i], uncerListPre[i]))
 
-probabilityErrList = probabilityErrList / cnt
-uncertaintyList = uncertaintyList / cnt
+proErrListReal /= cntReal
+uncerListReal /= cntReal
+
+proErrListPre /= cntPre
+uncerListPre /= cntPre
 
 for i in range(numOfClass):
-    if (cnt[i] == 0):
-        probabilityErrList[i] = 1
-        uncertaintyList[i] = 1
+    if (cntReal[i] == 0):
+        proErrListReal[i] = 1
+        uncerListReal[i] = 1
+    if (cntPre[i] == 0):
+        proErrListPre[i] = 1
+        uncerListPre[i] = 1
 
-plt.plot(probabilityErrList, marker='*', c='black', label= 'ProbabilityOfErr')
-plt.plot(uncertaintyList, marker='s', c='red', label= 'Uncertainty')
+plt.plot(proErrListReal, marker='*', c='black', label= 'ProbabilityOfErrReal')
+plt.plot(uncerListReal, marker='s', c='red', label= 'UncertaintyReal')
+plt.plot(proErrListPre, marker='>', c='blue', label= 'ProbabilityOfErrPre')
+plt.plot(uncerListPre, marker='o', c='green', label= 'UncertaintyPre')
 plt.xticks(np.arange(numOfClass))
 plt.xlabel('class')
 plt.ylabel('value')

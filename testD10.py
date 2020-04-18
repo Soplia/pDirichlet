@@ -15,20 +15,20 @@ def RocPrErr(fnout, fnlab):
   outputs = torch.clamp(outputs, min=0)
   labels = torch.clamp(labels, min=0)
   # Compute softmax
-  Soutputs = torch.sum(outputs,1)
-  Soutputs = Soutputs.repeat(5,1)
-  Soutputs = Soutputs.transpose(1,0)
-  outputsSM = outputs/Soutputs
+  Soutputs = torch.sum(outputs, 1)
+  Soutputs = Soutputs.repeat(5, 1)
+  Soutputs = Soutputs.transpose(1, 0)
+  outputsSM = outputs / Soutputs
   # get labels and max prob
-  Prob = torch.max(outputsSM,1).values
-  Pred = torch.max(outputsSM,1).indices
-  Pr_err = 1-Prob
+  Prob = torch.max(outputsSM, 1).values
+  Pred = torch.max(outputsSM, 1).indices
+  Pr_err = 1 - Prob
   # Now compute ROC curve with rejection strategy
   estlabels = torch.argmax(outputs,1)
   # Compute True detection rate
   vtd =(estlabels == labels) 
   npos = torch.sum(vtd)
-  pos_rate = (100.0 * npos)/len(labels)
+  pos_rate = (100.0 * npos) /len(labels)
   print("accuracy = {}".format(pos_rate))
   # Compute ROC Curve
   # sort according to U and Pr_err
@@ -39,9 +39,22 @@ def RocPrErr(fnout, fnlab):
   nbtotposPr = torch.sum(labels<5,0).type(torch.DoubleTensor)
   True_Pos_Rate_Pr_Vec = CSnpp/nbtotposPr
   False_Pos_Rate_Pr_Vec = 1- CSnpp/CS
+
+  #base = vtd[sp]
+  #real = labels[sp]
+  #total = torch.cumsum(torch.ones(len(sp)), 0).type(torch.DoubleTensor)
+  
+  #pos = torch.cumsum(base, 0).type (torch.DoubleTensor)
+  #fals = total - pos
+
+  #nbtotposPr = torch.cumsum(real < 5, 0).type(torch.DoubleTensor)
+  #nbtotfalPr = torch.cumsum(real > 5, 0).type(torch.DoubleTensor)
+
+  #True_Pos_Rate_Pr_Vec = pos / nbtotposPr
+  #False_Pos_Rate_Pr_Vec = fals / nbtotfalPr
+
   return True_Pos_Rate_Pr_Vec, False_Pos_Rate_Pr_Vec
   
-
 def RocU(fnout, fnlab):
   # Uncertainty: Compute roc curve from output file and true labels
   outputs = np.load(fnout)
@@ -86,6 +99,15 @@ tp_P_DI, fp_P_DI = RocPrErr('./data/test5DiriQuickdraw10outputs.npz','./data/tes
 tp_U_CE, fp_U_CE = RocU('./data/test5CelQuickdraw10outputs.npz','./data/test5CelQuickdraw10realLabel.npz' )
 # Compute Uncert ROC curve for Dirichlet 
 tp_U_DI, fp_U_DI = RocU('./data/test5DiriQuickdraw10outputs.npz','./data/test5DiriQuickdraw10realLabel.npz')
+
+## Compute Pr_Err ROC curve for Cross Entropy
+#tp_P_CE, fp_P_CE = RocPrErr('E:/Phd/kdirichlet/data/testUPEC10outputs.npz','E:/Phd/kdirichlet/data/testUPEC10realLabel.npz' )
+## Compute Pr_Err ROC curve for Dirichlet 
+#tp_P_DI, fp_P_DI = RocPrErr('E:/Phd/kdirichlet/data/testUPED10outputs.npz','E:/Phd/kdirichlet/data/testUPED10realLabel.npz' )
+## Compute Uncert ROC curve for Cross Entropy
+#tp_U_CE, fp_U_CE = RocU('E:/Phd/kdirichlet/data/testUPEC10outputs.npz','E:/Phd/kdirichlet/data/testUPEC10realLabel.npz')
+## Compute Uncert ROC curve for Dirichlet 
+#tp_U_DI, fp_U_DI = RocU('E:/Phd/kdirichlet/data/testUPED10outputs.npz','E:/Phd/kdirichlet/data/testUPED10realLabel.npz')
 
 #pdb.set_trace()
 
